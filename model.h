@@ -25,13 +25,7 @@ public:
 
     void addFigure(int num);
 
-    void moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol)
-    {
-        if ( (_grid[oldRow][oldCol] != 0) and (_grid[newRow][newCol] == 0) )
-        {
-            std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
-        }
-    }
+    void moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol);
 
 };
 
