@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->scene->setModel(model);
     ui->scene->setFixedSize(QSize(
                                 model->getGrid().size()*50+1, model->getGrid()[0].size()*50+1)); //FIXME
+    model->addFigure(3);       //debug
 
 }
 
