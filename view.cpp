@@ -12,7 +12,7 @@ void View::drawScene(QPainter *painter)
 {
     auto& grid = _model->getGrid();
     size_t col = grid.size();       //FIXME add getCol() and getRow() in model
-    size_t row = grid[0].size();
+    size_t row = grid[0].size();    //
     for (size_t r = 0; r < row; r++)
     {
         for( size_t c = 0; c < col; c++)
@@ -38,5 +38,32 @@ void View::drawScene(QPainter *painter)
                 painter->drawEllipse(rect);
             }
         }
+    }
+}
+
+View::View(QWidget *parent) : QWidget(parent) { }
+
+void View::setModel(Model *model)            { _model = model; }
+
+void View::mousePressEvent(QMouseEvent *event)
+{
+
+    if ( (!figureSelected) and ( event->button() == Qt::MouseButton::LeftButton ) )
+    {
+        figureSelected = true;
+        _rowBuf = event->pos().y() / cellSize;
+        _colBuf = event->pos().x() / cellSize;
+    }
+}
+
+void View::mouseReleaseEvent(QMouseEvent *event)
+{
+    if ( (figureSelected) and (event->button() == Qt::MouseButton::LeftButton) )
+    {
+        figureSelected = false;
+        size_t newRow = event->pos().y() / cellSize;
+        size_t newCol = event->pos().x() / cellSize;
+        _model->moveTo(_rowBuf, _colBuf, newRow, newCol);
+        repaint();
     }
 }

@@ -23,7 +23,7 @@ void Model::clear()
     }
 }
 
-void Model::addFigure(int num)
+void Model::addRandomFigures(int num)
 {
     for (int i = 0 ; i < num; i++)
     {
@@ -46,4 +46,9 @@ void Model::moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol)  
     {
         std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
     }
+}
+
+void Model::addFigures(size_t row, size_t col, int figureType)
+{
+    _grid[row][col] = figureType;
 }

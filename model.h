@@ -23,9 +23,16 @@ public:
 
     void clear();
 
-    void addFigure(int num);
+    void addRandomFigures(int num);
 
     void moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol);
+
+    void addFigures(size_t row, size_t col, int figureType);
+
+    bool checkLines()
+    {
+
+    }
 
 };
 
