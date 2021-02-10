@@ -65,5 +65,8 @@ void View::mouseReleaseEvent(QMouseEvent *event)
         size_t newCol = event->pos().x() / cellSize;
         _model->moveTo(_rowBuf, _colBuf, newRow, newCol);
         repaint();
+
+        _model->checkLines(5); //debug
+        repaint();              //debug
     }
 }

@@ -22,8 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
     model->addFigures(0,0,0);           //debug
     model->addFigures(0,1,1);           //debug
     model->addFigures(0,2,2);           //debug
-    model->addFigures(0,3,3);           //debug
-    model->addFigures(0,4,4);           //debug
+    model->addFigures(0,3,1);           //debug
+    model->addFigures(0,4,1);           //debug
+    model->addFigures(0,5,1);           //debug
+    model->addFigures(0,6,1);           //debug
+    model->checkLines(5);
 }
 
 MainWindow::~MainWindow()

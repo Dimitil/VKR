@@ -2,10 +2,10 @@
 #include <QDebug>
 
 
-Model::Model(size_t col, size_t row, QObject *parent) : _col(col),
-    _row(row), QObject(parent)
+Model::Model(int col, int row, QObject *parent) : QObject(parent),
+    _col(col), _row(row)
 {
-    for(size_t i = 0; i < row; i++) {
+    for(int i = 0; i < row; i++) {
         _grid.push_back(QVector<int>(col, 0));
     }
 }
@@ -14,9 +14,9 @@ Gridtype &Model::getGrid() { return _grid;}
 
 void Model::clear()
 {
-    for (size_t r = 0; r < _row; r++)
+    for (int r = 0; r < _row; r++)
     {
-        for(size_t c = 0; c < _col; c++)
+        for(int c = 0; c < _col; c++)
         {
             _grid[r][c] = 0;
         }
@@ -29,8 +29,8 @@ void Model::addRandomFigures(int num)
     {
         int f = rand() % 4 + 1;
 
-        size_t r = 0;
-        size_t c = 0;
+        int r = 0;
+        int c = 0;
         do {
             r = rand()%_row;
             c = rand()%_col;
@@ -40,7 +40,7 @@ void Model::addRandomFigures(int num)
     }
 }
 
-void Model::moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol)  //NEED TEST
+void Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
 {
     if ( (_grid[oldRow][oldCol] != 0) and (_grid[newRow][newCol] == 0) )
     {
@@ -48,7 +48,7 @@ void Model::moveTo(size_t oldRow, size_t oldCol, size_t newRow, size_t newCol)  
     }
 }
 
-void Model::addFigures(size_t row, size_t col, int figureType)
+void Model::addFigures(int row, int col, int figureType)
 {
     _grid[row][col] = figureType;
 }
