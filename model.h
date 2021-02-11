@@ -8,6 +8,13 @@
 
 using Gridtype = QVector<QVector<int>>;
 
+struct needToDeleteCells{
+    int down;
+    int right;
+    int downLeft;
+    int downRight;
+};
+
 class Model : QObject
 {
     Q_OBJECT
@@ -16,7 +23,7 @@ class Model : QObject
     bool _gameOn = false;
     int _col;
     int _row;
-
+    int _score = 0;
 public:
     Model(int col = 10, int row = 10, QObject *parent = nullptr);
 
@@ -30,8 +37,14 @@ public:
 
     void addFigures(int row, int col, int figureType);
 
-    void checkLines(int equalCount)
+    void checkAndDeleteLines(int equalCount)
     {
+        QVector<QVector<needToDeleteCells>> toDelete(_row);
+        for(int i = 0 ; i < toDelete.size(); i++)
+        {
+            toDelete[i].resize(_col);
+        }
+
         for(int r = 0; r < _row; r++)
         {
             for(int c = 0; c < _col; c++)
@@ -40,15 +53,21 @@ public:
                 {
                     continue;
                 }
+                toDelete[r][c].right = rightCheck(r, c);
+                toDelete[r][c].down = downCheck(r, c);
+                toDelete[r][c].downRight =  downRightCheck(r, c);
+                toDelete[r][c].downLeft = downLeftCheck(r, c);
+            }
+        }
 
-                size_t rightEq = rightCheck(r, c);
-
-                size_t downEq = downCheck(r, c);
-
-                size_t downRightEq =  downRightCheck(r, c);
-
-                size_t downLeftEq = downLeftCheck(r, c);   //завести какой нибудь контейнер и в него складывать
-                //qDebug() << r << c << downLeftEq;          //все что подлежит удалению
+        for(int r = 0; r < _row; r++)
+        {
+            for(int c = 0; c < _col; c++)
+            {
+                deleteRight(r,c,equalCount, toDelete[r][c].right);
+                deleteDown(r,c,equalCount, toDelete[r][c].down);
+                deleteDownRight(r,c,equalCount, toDelete[r][c].downRight);
+                deleteDownLeft(r,c,equalCount, toDelete[r][c].downLeft);
             }
         }
     }
@@ -69,6 +88,19 @@ public:
         return equalNumToRight;
     }
 
+    void deleteRight(int row, int col, int equalCount, int equalRight)
+    {
+        if (equalRight >= equalCount-1)
+        {
+            for ( int i = 0; i <= equalRight; i++)
+            {
+                _grid[row][col+i] = 0;
+            }
+        }
+    }
+
+
+
     int downCheck(int row, int col)
     {
         int equalNumToDown = 0;
@@ -83,6 +115,17 @@ public:
             }
         }
         return equalNumToDown;
+    }
+
+    void deleteDown(int row, int col, int equalCount, int equalDown)
+    {
+        if (equalDown >= equalCount-1)
+        {
+            for ( int i = 0; i <= equalDown; i++)
+            {
+                _grid[row+i][col] = 0;
+            }
+        }
     }
 
     int downRightCheck(int row, int col)
@@ -101,6 +144,17 @@ public:
         return equalNumToDownRight;
     }
 
+    void deleteDownRight(int row, int col, int equalCount, int equalDownRight)
+    {
+        if (equalDownRight >= equalCount-1)
+        {
+            for ( int i = 0; i <= equalDownRight; i++)
+            {
+                _grid[row+i][col+i] = 0;
+            }
+        }
+    }
+
     int downLeftCheck(int row, int col)
     {
         int equalNumToDownLeft = 0;
@@ -116,6 +170,18 @@ public:
         }
         return equalNumToDownLeft;
     }
+
+    void deleteDownLeft(int row, int col, int equalCount, int equalDownLeft)
+    {
+        if (equalDownLeft >= equalCount-1)
+        {
+            for ( int i = 0; i <= equalDownLeft; i++)
+            {
+                _grid[row+i][col-i] = 0;
+            }
+        }
+    }
+
 };
 
 #endif // MODEL_H

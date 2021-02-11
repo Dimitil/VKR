@@ -17,16 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->scene->setFixedSize(QSize(
                                 model->getGrid().size()*50+1, model->getGrid()[0].size()*50+1)); //FIXME
 
-    //model->addRandomFigures(3);       //debug
+    model->addRandomFigures(50);       //debug
 
-    model->addFigures(0,0,0);           //debug
-    model->addFigures(0,1,1);           //debug
-    model->addFigures(0,2,2);           //debug
-    model->addFigures(0,3,1);           //debug
-    model->addFigures(0,4,1);           //debug
-    model->addFigures(0,5,1);           //debug
-    model->addFigures(0,6,1);           //debug
-    model->checkLines(5);
 }
 
 MainWindow::~MainWindow()
