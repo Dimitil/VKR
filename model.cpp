@@ -10,6 +10,19 @@ Model::Model(int col, int row, QObject *parent) : QObject(parent),
     }
 }
 
+void Model::resize(int row, int col)
+{
+    clear();
+    _row = row;
+    _col = col;
+    _grid.resize(row);
+    for(int r = 0; r< _row; r++)
+    {
+        _grid[r].resize(col);
+        _grid[r].fill(0);
+    }
+}
+
 Gridtype &Model::getGrid() { return _grid;}
 
 void Model::clear()
@@ -37,6 +50,7 @@ void Model::addRandomFigures(int num)
         }
         while( _grid[r][c] != 0);
         _grid[r][c] = f;
+
     }
 }
 
@@ -51,4 +65,229 @@ void Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
 void Model::addFigures(int row, int col, int figureType)
 {
     _grid[row][col] = figureType;
+}
+
+int Model::checkAndDeleteLines(int equalCount, int row, int col)
+{
+    toDeleteCells deleteThisRight     = horizontalCheck(row, col);
+    toDeleteCells deleteThisDown      = verticalCheck(row, col);
+    toDeleteCells deleteThisDownRight = rightDiagonalCheck(row, col);
+    toDeleteCells deleteThisDownLeft  = leftDiagonalCheck(row, col);
+
+    int rightDeleted     = deleteRight(deleteThisRight, equalCount);
+    int downDeleted      = deleteDown(deleteThisDown, equalCount);
+    int downRightDeleted = deleteDownRight(deleteThisDownRight, equalCount);
+    int downLeftDeleted  = deleteDownLeft(deleteThisDownLeft, equalCount);
+
+    int totalDeleted = rightDeleted + downDeleted + downRightDeleted + downLeftDeleted;
+    qDebug() << totalDeleted;
+    return totalDeleted;
+}
+
+toDeleteCells Model::horizontalCheck(int row, int col)
+{
+    toDeleteCells horizontal;
+    horizontal.y = row;
+    int equal = 0;
+    //left check;
+    for ( int c = col - 1; c >= 0; c--)
+    {
+        if (_grid[row][col] == _grid[row][c])
+        {
+            equal++;
+        }
+        else {
+            break;
+        }
+    }
+    horizontal.x = col - equal;
+    //right check;
+    for( int c = col + 1; c < _col; c++)
+    {
+        if (_grid[row][col] == _grid[row][c])
+        {
+            equal++;
+        }
+        else {
+            break;
+        }
+    }
+
+    horizontal.count = equal;
+    return horizontal;
+}
+
+toDeleteCells Model::verticalCheck(int row, int col)
+{
+    toDeleteCells vertical;
+    vertical.x = col;
+    int equal = 0;
+    //up check
+    for (int r = row - 1; r >= 0; r--)
+    {
+        if(_grid[row][col] == _grid[r][col])
+        {
+            equal++;
+        }
+        else {
+            break;
+        }
+    }
+    vertical.y = row - equal;
+    //down check
+    for ( int r = row +1 ; r < _row; r++)
+    {
+        if(_grid[row][col] == _grid[r][col])
+        {
+            equal++;
+        }
+        else {
+            break;
+        }
+    }
+    vertical.count = equal;
+    return vertical;
+}
+
+toDeleteCells Model::rightDiagonalCheck(int row, int col)
+{
+    toDeleteCells rightDiagonal;
+    int equal = 0;
+    //up check
+    for (int r = row - 1, c = col - 1; (c >= 0) && (r >= 0) ; --r, --c)
+    {
+        if (_grid[row][col] == _grid[r][c])
+        {
+            equal ++;
+        }
+        else {
+            break;
+        }
+    }
+    rightDiagonal.y = row - equal;
+    rightDiagonal.x = col - equal;
+    //down check
+    for (int r = row + 1, c = col + 1; (c < _col) && (r < _row) ; ++r, ++c)
+    {
+        if (_grid[row][col] == _grid[r][c])
+        {
+            equal ++;
+        }
+        else {
+            break;
+        }
+    }
+    rightDiagonal.count = equal;
+    return rightDiagonal;
+}
+
+toDeleteCells Model::leftDiagonalCheck(int row, int col)
+{
+    toDeleteCells leftDiagonal;
+    int equal = 0;
+    //up check
+    for (int r = row - 1, c = col + 1; (c < _col) && (r >= 0) ; --r, ++c)
+    {
+        if (_grid[row][col] == _grid[r][c])
+        {
+            equal ++;
+        }
+        else {
+            break;
+        }
+    }
+    leftDiagonal.y = row - equal;
+    leftDiagonal.x = col + equal;
+    //down check
+    for (int r = row + 1, c = col - 1; (c >= 0) && (r < _row) ; ++r, --c)
+    {
+        if (_grid[row][col] == _grid[r][c])
+        {
+            equal ++;
+        }
+        else {
+            break;
+        }
+    }
+    leftDiagonal.count = equal;
+    return leftDiagonal;
+}
+
+
+
+int Model::deleteRight(toDeleteCells point, int equalCount)
+{
+    int deleted = 0;
+    if (point.count >= equalCount-1)
+    {
+        for (int i = 0; i <= point.count; i++)
+        {
+            if (_grid[point.y][point.x+i] == 0)
+            {
+                continue;
+            }
+            _grid[point.y][point.x+i] = 0;
+            deleted ++;
+        }
+    }
+    return deleted;
+}
+
+int Model::deleteDown(toDeleteCells point, int equalCount)
+{
+    int deleted = 0;
+    if (point.count >= equalCount-1)
+    {
+        for ( int i = 0; i <= point.count; i++)
+        {
+            if (_grid[point.y + i][point.x] == 0)
+            {
+                continue;
+            }
+            _grid[point.y + i][point.x] = 0;
+            deleted++;
+        }
+    }
+    return deleted;
+}
+
+int Model::deleteDownRight(toDeleteCells point, int equalCount)
+{
+    int deleted = 0;
+    if (point.count >= equalCount-1)
+    {
+        for ( int i = 0; i <= point.count; i++)
+        {
+            if (_grid[point.y + i][point.x + i] == 0)
+            {
+                continue;
+            }
+            _grid[point.y + i][point.x + i] = 0;
+            deleted++;
+        }
+    }
+    return deleted;
+}
+
+int Model::deleteDownLeft(toDeleteCells point, int equalCount)
+{
+    int deleted = 0;
+    if (point.count >= equalCount - 1)
+    {
+        for ( int i = 0; i <= point.count; i++)
+        {
+            if (_grid[point.y + i][point.x - i] == 0)
+            {
+                continue;
+            }
+            _grid[point.y + i][point.x - i] = 0;
+            deleted++;
+        }
+    }
+    return deleted;
+}
+
+void Model::addScore(int score)
+{
+    _score+=score;
 }

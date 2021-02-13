@@ -9,8 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    //auto view = new View();
-    auto model = new Model(10, 10);
+    auto model = new Model(10, 10, this);
 
 
     ui->scene->setModel(model);

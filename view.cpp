@@ -66,7 +66,7 @@ void View::mouseReleaseEvent(QMouseEvent *event)
         _model->moveTo(_rowBuf, _colBuf, newRow, newCol);
         repaint();
 
-        _model->checkAndDeleteLines(5); //debug
+        _model->checkAndDeleteLines(5, newRow, newCol); //debug
         repaint();              //debug
     }
 }
