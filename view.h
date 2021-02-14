@@ -13,10 +13,6 @@ class View : public QWidget
     Q_OBJECT
     Model *_model;
 
-    bool figureSelected = false;
-    size_t _rowBuf;
-    size_t _colBuf;
-
 protected:
     static constexpr size_t cellSize = 50;
 

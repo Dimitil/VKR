@@ -50,16 +50,21 @@ void Model::addRandomFigures(int num)
         }
         while( _grid[r][c] != 0);
         _grid[r][c] = f;
-
+        if (checkAndDeleteLines(r, c))
+        {
+            --i;
+        }
     }
 }
 
-void Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
+bool Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
 {
     if ( (_grid[oldRow][oldCol] != 0) and (_grid[newRow][newCol] == 0) )
     {
         std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
+        return true;
     }
+    return false;
 }
 
 void Model::addFigures(int row, int col, int figureType)
@@ -67,20 +72,20 @@ void Model::addFigures(int row, int col, int figureType)
     _grid[row][col] = figureType;
 }
 
-int Model::checkAndDeleteLines(int equalCount, int row, int col)
+int Model::checkAndDeleteLines(int row, int col)
 {
     toDeleteCells deleteThisRight     = horizontalCheck(row, col);
     toDeleteCells deleteThisDown      = verticalCheck(row, col);
     toDeleteCells deleteThisDownRight = rightDiagonalCheck(row, col);
     toDeleteCells deleteThisDownLeft  = leftDiagonalCheck(row, col);
 
-    int rightDeleted     = deleteRight(deleteThisRight, equalCount);
-    int downDeleted      = deleteDown(deleteThisDown, equalCount);
-    int downRightDeleted = deleteDownRight(deleteThisDownRight, equalCount);
-    int downLeftDeleted  = deleteDownLeft(deleteThisDownLeft, equalCount);
+    int rightDeleted     = deleteRight(deleteThisRight);
+    int downDeleted      = deleteDown(deleteThisDown);
+    int downRightDeleted = deleteDownRight(deleteThisDownRight);
+    int downLeftDeleted  = deleteDownLeft(deleteThisDownLeft);
 
     int totalDeleted = rightDeleted + downDeleted + downRightDeleted + downLeftDeleted;
-    qDebug() << totalDeleted;
+    addScore(totalDeleted);
     return totalDeleted;
 }
 
@@ -215,10 +220,10 @@ toDeleteCells Model::leftDiagonalCheck(int row, int col)
 
 
 
-int Model::deleteRight(toDeleteCells point, int equalCount)
+int Model::deleteRight(toDeleteCells point)
 {
     int deleted = 0;
-    if (point.count >= equalCount-1)
+    if (point.count >= _equalCount-1)
     {
         for (int i = 0; i <= point.count; i++)
         {
@@ -233,10 +238,10 @@ int Model::deleteRight(toDeleteCells point, int equalCount)
     return deleted;
 }
 
-int Model::deleteDown(toDeleteCells point, int equalCount)
+int Model::deleteDown(toDeleteCells point)
 {
     int deleted = 0;
-    if (point.count >= equalCount-1)
+    if (point.count >= _equalCount-1)
     {
         for ( int i = 0; i <= point.count; i++)
         {
@@ -251,10 +256,10 @@ int Model::deleteDown(toDeleteCells point, int equalCount)
     return deleted;
 }
 
-int Model::deleteDownRight(toDeleteCells point, int equalCount)
+int Model::deleteDownRight(toDeleteCells point)
 {
     int deleted = 0;
-    if (point.count >= equalCount-1)
+    if (point.count >= _equalCount - 1)
     {
         for ( int i = 0; i <= point.count; i++)
         {
@@ -269,10 +274,10 @@ int Model::deleteDownRight(toDeleteCells point, int equalCount)
     return deleted;
 }
 
-int Model::deleteDownLeft(toDeleteCells point, int equalCount)
+int Model::deleteDownLeft(toDeleteCells point)
 {
     int deleted = 0;
-    if (point.count >= equalCount - 1)
+    if (point.count >= _equalCount - 1)
     {
         for ( int i = 0; i <= point.count; i++)
         {
@@ -287,7 +292,18 @@ int Model::deleteDownLeft(toDeleteCells point, int equalCount)
     return deleted;
 }
 
-void Model::addScore(int score)
+void Model::addScore(int deletedCells)
 {
-    _score+=score;
+    if (deletedCells == _equalCount)
+    {
+        _score += deletedCells;
+    }
+    else if (deletedCells > _equalCount)
+    {
+        int bonus = deletedCells - _equalCount;
+        bonus *=2;
+        _score += bonus;
+        _score += _equalCount;
+    }
+    emit scoreChanged(_score);
 }

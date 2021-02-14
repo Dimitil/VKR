@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     model->addRandomFigures(50);       //debug
 
+
+    connect(model, &Model::scoreChanged, ui->scoreDisplay,  QOverload<int>::of(&QLCDNumber::display));
 }
 
 MainWindow::~MainWindow()

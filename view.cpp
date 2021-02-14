@@ -48,25 +48,22 @@ void View::setModel(Model *model)            { _model = model; }
 void View::mousePressEvent(QMouseEvent *event)
 {
 
-    if ( (!figureSelected) and ( event->button() == Qt::MouseButton::LeftButton ) )
+    if (event->button() == Qt::MouseButton::LeftButton )
     {
-        figureSelected = true;
-        _rowBuf = event->pos().y() / cellSize;
-        _colBuf = event->pos().x() / cellSize;
+        int row = event->pos().y() / cellSize;
+        int col = event->pos().x() / cellSize;
+        _model->setFrom(row, col);
     }
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
-    if ( (figureSelected) and (event->button() == Qt::MouseButton::LeftButton) )
+    if ( event->button() == Qt::MouseButton::LeftButton)
     {
-        figureSelected = false;
-        size_t newRow = event->pos().y() / cellSize;
-        size_t newCol = event->pos().x() / cellSize;
-        _model->moveTo(_rowBuf, _colBuf, newRow, newCol);
+        int row = event->pos().y() / cellSize;
+        int col = event->pos().x() / cellSize;
+        _model->setTo(row, col);
+        _model->doStep();
         repaint();
-
-        _model->checkAndDeleteLines(5, newRow, newCol); //debug
-        repaint();              //debug
     }
 }

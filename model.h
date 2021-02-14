@@ -14,25 +14,31 @@ struct toDeleteCells{
     int count;
 };
 
-class Model : QObject
+class Model : public QObject
 {
     Q_OBJECT
 
     Gridtype _grid;
-    bool _gameOn = false;
     int _col;
     int _row;
+    int _equalCount = 5;
     int _score = 0;
+    int _fromCol;
+    int _fromRow;
+    int _toCol;
+    int _toRow;
+    bool userMadeMove = false;
 
     toDeleteCells horizontalCheck(int row, int col);
     toDeleteCells verticalCheck(int row, int col);
     toDeleteCells rightDiagonalCheck(int row, int col);
     toDeleteCells leftDiagonalCheck(int row, int col);
-    int deleteRight(toDeleteCells point, int equalCount);
-    int deleteDown(toDeleteCells point, int equalCount);
-    int deleteDownRight(toDeleteCells point, int equalCount);
-    int deleteDownLeft(toDeleteCells point, int equalCount);
+    int deleteRight(toDeleteCells point);
+    int deleteDown(toDeleteCells point);
+    int deleteDownRight(toDeleteCells point);
+    int deleteDownLeft(toDeleteCells point);
     void addScore(int score);
+    bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
     void clear();
 public:
 
@@ -40,10 +46,34 @@ public:
 
     Gridtype& getGrid();
     void addRandomFigures(int num);
-    void moveTo(int oldRow, int oldCol, int newRow, int newCol);
+
     void addFigures(int row, int col, int figureType);
-    int checkAndDeleteLines(int equalCount, int row, int col);
+    int checkAndDeleteLines(int row, int col);
     void resize(int row, int col);
+    void setFrom(int row, int col)
+    {
+        _fromCol = col;
+        _fromRow = row;
+    }
+    void setTo(int row, int col)
+    {
+        _toCol = col;
+        _toRow = row;
+    }
+    void doStep()
+    {
+        //pathFinding();
+        if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
+        {
+            if (!checkAndDeleteLines(_toRow, _toCol))
+            {
+                addRandomFigures(3);
+            }
+        }
+    }
+
+signals:
+    void scoreChanged(int newScore);
 };
 
 #endif // MODEL_H
