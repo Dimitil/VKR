@@ -74,222 +74,160 @@ void Model::addFigures(int row, int col, int figureType)
 
 int Model::checkAndDeleteLines(int row, int col)
 {
-    toDeleteCells deleteThisRight     = horizontalCheck(row, col);
-    toDeleteCells deleteThisDown      = verticalCheck(row, col);
-    toDeleteCells deleteThisDownRight = rightDiagonalCheck(row, col);
-    toDeleteCells deleteThisDownLeft  = leftDiagonalCheck(row, col);
+    QSet<cell*> set;
 
-    int rightDeleted     = deleteRight(deleteThisRight);
-    int downDeleted      = deleteDown(deleteThisDown);
-    int downRightDeleted = deleteDownRight(deleteThisDownRight);
-    int downLeftDeleted  = deleteDownLeft(deleteThisDownLeft);
+    horizontalCheck(set, row, col);
+    verticalCheck(set, row, col);
+    rightDiagonalCheck(set, row, col);
+    leftDiagonalCheck(set, row, col);
 
-    int totalDeleted = rightDeleted + downDeleted + downRightDeleted + downLeftDeleted;
+    int totalDeleted = deleteSet(set);
     addScore(totalDeleted);
     return totalDeleted;
 }
 
-toDeleteCells Model::horizontalCheck(int row, int col)
+void Model::horizontalCheck(QSet<cell*> &set, int row, int col)
 {
-    toDeleteCells horizontal;
-    horizontal.y = row;
-    int equal = 0;
     //left check;
+    int count = 0;
     for ( int c = col - 1; c >= 0; c--)
     {
         if (_grid[row][col] == _grid[row][c])
         {
-            equal++;
+            count++;
         }
         else {
             break;
         }
     }
-    horizontal.x = col - equal;
+    cell left = col - count;
     //right check;
     for( int c = col + 1; c < _col; c++)
     {
         if (_grid[row][col] == _grid[row][c])
         {
-            equal++;
+            count++;
         }
         else {
             break;
         }
     }
-
-    horizontal.count = equal;
-    return horizontal;
+    //filling set
+    if (count >= _equalCount - 1)
+    {
+        for (int i = 0; i<=count; i++)
+        {
+            set.insert(&_grid[row][left+i]);
+        }
+    }
 }
 
-toDeleteCells Model::verticalCheck(int row, int col)
+void Model::verticalCheck(QSet<cell*> &set, int row, int col)
 {
-    toDeleteCells vertical;
-    vertical.x = col;
-    int equal = 0;
+    int count = 0;
     //up check
     for (int r = row - 1; r >= 0; r--)
     {
         if(_grid[row][col] == _grid[r][col])
         {
-            equal++;
+            count++;
         }
         else {
             break;
         }
     }
-    vertical.y = row - equal;
+    int up = row - count;
     //down check
     for ( int r = row +1 ; r < _row; r++)
     {
         if(_grid[row][col] == _grid[r][col])
         {
-            equal++;
+            count++;
         }
         else {
             break;
         }
     }
-    vertical.count = equal;
-    return vertical;
+    //filling set
+    if (count >= _equalCount - 1)
+    {
+        for (int i = 0; i<=count; i++)
+        {
+            set.insert(&_grid[up + i][col]);
+        }
+    }
 }
 
-toDeleteCells Model::rightDiagonalCheck(int row, int col)
+void Model::rightDiagonalCheck(QSet<cell*> &set, int row, int col)
 {
-    toDeleteCells rightDiagonal;
-    int equal = 0;
+    int count = 0;
     //up check
     for (int r = row - 1, c = col - 1; (c >= 0) && (r >= 0) ; --r, --c)
     {
         if (_grid[row][col] == _grid[r][c])
         {
-            equal ++;
+            count ++;
         }
         else {
             break;
         }
     }
-    rightDiagonal.y = row - equal;
-    rightDiagonal.x = col - equal;
+    int up = row - count;
+    int left = col - count;
     //down check
     for (int r = row + 1, c = col + 1; (c < _col) && (r < _row) ; ++r, ++c)
     {
         if (_grid[row][col] == _grid[r][c])
         {
-            equal ++;
+            count++;
         }
         else {
             break;
         }
     }
-    rightDiagonal.count = equal;
-    return rightDiagonal;
+    if (count >= _equalCount - 1)
+    {
+        for (int i = 0; i<=count; i++)
+        {
+            set.insert(&_grid[up + i][left+i]);
+        }
+    }
 }
 
-toDeleteCells Model::leftDiagonalCheck(int row, int col)
+void Model::leftDiagonalCheck(QSet<cell*> &set, int row, int col)
 {
-    toDeleteCells leftDiagonal;
-    int equal = 0;
+    int count = 0;
     //up check
     for (int r = row - 1, c = col + 1; (c < _col) && (r >= 0) ; --r, ++c)
     {
         if (_grid[row][col] == _grid[r][c])
         {
-            equal ++;
+            count++;
         }
         else {
             break;
         }
     }
-    leftDiagonal.y = row - equal;
-    leftDiagonal.x = col + equal;
+    int up = row - count;
+    int right = col + count;
     //down check
     for (int r = row + 1, c = col - 1; (c >= 0) && (r < _row) ; ++r, --c)
     {
         if (_grid[row][col] == _grid[r][c])
         {
-            equal ++;
+            count ++;
         }
         else {
             break;
         }
     }
-    leftDiagonal.count = equal;
-    return leftDiagonal;
-}
-
-
-
-int Model::deleteRight(toDeleteCells point)
-{
-    int deleted = 0;
-    if (point.count >= _equalCount-1)
+    if (count >= _equalCount - 1)
     {
-        for (int i = 0; i <= point.count; i++)
+        for (int i = 0; i<=count; i++)
         {
-            if (_grid[point.y][point.x+i] == 0)
-            {
-                continue;
-            }
-            _grid[point.y][point.x+i] = 0;
-            deleted ++;
+            set.insert(&_grid[up + i][right - i]);
         }
     }
-    return deleted;
-}
-
-int Model::deleteDown(toDeleteCells point)
-{
-    int deleted = 0;
-    if (point.count >= _equalCount-1)
-    {
-        for ( int i = 0; i <= point.count; i++)
-        {
-            if (_grid[point.y + i][point.x] == 0)
-            {
-                continue;
-            }
-            _grid[point.y + i][point.x] = 0;
-            deleted++;
-        }
-    }
-    return deleted;
-}
-
-int Model::deleteDownRight(toDeleteCells point)
-{
-    int deleted = 0;
-    if (point.count >= _equalCount - 1)
-    {
-        for ( int i = 0; i <= point.count; i++)
-        {
-            if (_grid[point.y + i][point.x + i] == 0)
-            {
-                continue;
-            }
-            _grid[point.y + i][point.x + i] = 0;
-            deleted++;
-        }
-    }
-    return deleted;
-}
-
-int Model::deleteDownLeft(toDeleteCells point)
-{
-    int deleted = 0;
-    if (point.count >= _equalCount - 1)
-    {
-        for ( int i = 0; i <= point.count; i++)
-        {
-            if (_grid[point.y + i][point.x - i] == 0)
-            {
-                continue;
-            }
-            _grid[point.y + i][point.x - i] = 0;
-            deleted++;
-        }
-    }
-    return deleted;
 }
 
 void Model::addScore(int deletedCells)

@@ -5,14 +5,10 @@
 #include <QVector>
 #include <QColor>
 #include <QDebug>
+#include <QSet>
 
 using Gridtype = QVector<QVector<int>>;
-
-struct toDeleteCells{
-    int x;
-    int y;
-    int count;
-};
+using cell = int;
 
 class Model : public QObject
 {
@@ -29,14 +25,18 @@ class Model : public QObject
     int _toRow;
     bool userMadeMove = false;
 
-    toDeleteCells horizontalCheck(int row, int col);
-    toDeleteCells verticalCheck(int row, int col);
-    toDeleteCells rightDiagonalCheck(int row, int col);
-    toDeleteCells leftDiagonalCheck(int row, int col);
-    int deleteRight(toDeleteCells point);
-    int deleteDown(toDeleteCells point);
-    int deleteDownRight(toDeleteCells point);
-    int deleteDownLeft(toDeleteCells point);
+    void horizontalCheck(QSet<cell*> &set, int row, int col);
+    void verticalCheck(QSet<cell*> &set, int row, int col);
+    void rightDiagonalCheck(QSet<cell*> &set, int row, int col);
+    void leftDiagonalCheck(QSet<cell*> &set, int row, int col);
+    int deleteSet(QSet<cell*> &set)
+    {
+        for (auto &point : set)
+        {
+            *point = 0;
+        }
+        return set.size();
+    }
     void addScore(int score);
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
     void clear();
@@ -67,7 +67,7 @@ public:
         {
             if (!checkAndDeleteLines(_toRow, _toCol))
             {
-                addRandomFigures(3);
+                //addRandomFigures(3);
             }
         }
     }
