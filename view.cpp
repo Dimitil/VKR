@@ -21,19 +21,19 @@ void View::drawScene(QPainter *painter)
             painter->setBrush(Qt::gray);
             painter->drawRect(rect);
 
-            if (grid[r][c] == 1) {
+            if (grid[r][c].cellType() == FigureType::ONE) {
                 painter->setBrush(Qt::red);
                 painter->drawEllipse(rect);
             }
-            if (grid[r][c] == 2) {
+            if (grid[r][c].cellType() == FigureType::TWO) {
                 painter->setBrush(Qt::yellow);          //FIXME do function
                 painter->drawEllipse(rect);
             }
-            if (grid[r][c] == 3) {
+            if (grid[r][c].cellType() == FigureType::THREE) {
                 painter->setBrush(Qt::green);
                 painter->drawEllipse(rect);
             }
-            if (grid[r][c] == 4) {
+            if (grid[r][c].cellType() == FigureType::FOUR) {
                 painter->setBrush(Qt::blue);
                 painter->drawEllipse(rect);
             }
