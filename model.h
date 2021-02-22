@@ -145,7 +145,7 @@ public:
             {
                 if (!checkAndDeleteLines(_toRow, _toCol))
                 {
-                    //addRandomFigures(3);
+                    addRandomFigures(3);
                 }
             }
         }
@@ -167,7 +167,9 @@ public:
         //add left
         int x = cell->x();
         int y = cell->y();
-        if ( ((x - 1) >= 0) && !_grid[y][x-1].visited() && _grid[y][x - 1].cellType() == FigureType::EMPTY)
+        if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
+             _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
+             ((y == _fromRow) && ((x-1) == _fromCol)))
         {
             Cell* left = &_grid[y][x - 1];
             left->setParent(&_grid[y][x]);
@@ -175,7 +177,9 @@ public:
             q.push_back(left);
         }
         //add right
-        if( ((x + 1) < _col) && !_grid[y][x + 1].visited() && _grid[y][x + 1].cellType() == FigureType::EMPTY)
+        if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
+                _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
+                ((y == _fromRow) && ((x+1) == _fromCol)))
         {
             Cell* right = &_grid[y][x + 1];
             right->setParent(&_grid[y][x]);
@@ -183,7 +187,9 @@ public:
             q.push_back(right);
         }
         //add up
-        if ( ((y - 1) >= 0) && !_grid[y -1][x].visited() && _grid[y - 1][x].cellType() == FigureType::EMPTY)
+        if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
+             _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
+            (((y-1) == _fromRow) && (x == _fromCol)))
         {
             Cell* up = &_grid[y - 1][x];
             up->setParent(&_grid[y][x]);
@@ -191,7 +197,9 @@ public:
             q.push_back(up);
         }
         //add down
-        if ( ((y + 1) < _row) && !_grid[y + 1][x].visited() && _grid[y + 1][x].cellType() == FigureType::EMPTY)
+        if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
+             _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
+           (((y+1) == _fromRow) && (x == _fromCol)))
         {
             Cell* down = &_grid[y + 1][x];
             down->setVisited(true);
@@ -205,13 +213,13 @@ public:
         clearVisited();
         coordinateAllCells(); //debug - нужно оптимизировать установку x и y при добавлении фигуры
         QQueue <Cell*> q;
-        q.push_back(&_grid[_fromRow][_fromCol]);
-        _grid[_fromRow][_fromCol].setVisited(true);
+        q.push_back(&_grid[_toRow][_toCol]);
+        _grid[_toRow][_toCol].setVisited(true);
         while(!q.empty())
         {
             Cell* cell = q.back();
             q.pop_back();
-            if (cell == &_grid[_toRow][_toCol])
+            if (cell == &_grid[_fromRow][_fromCol])
             {
                 return true;
             }
