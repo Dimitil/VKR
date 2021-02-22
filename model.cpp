@@ -64,7 +64,10 @@ bool Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
     if ( (_grid[oldRow][oldCol].cellType() != FigureType::EMPTY) and
          (_grid[newRow][newCol].cellType() == FigureType::EMPTY) )
     {
-        std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
+        //std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
+        FigureType ft = _grid[oldRow][oldCol].cellType();
+        _grid[oldRow][oldCol].setType(FigureType::EMPTY);
+        _grid[newRow][newCol].setType(ft);
         return true;
     }
     return false;

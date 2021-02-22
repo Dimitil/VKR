@@ -6,6 +6,11 @@
 #include <QEvent>
 #include <QDebug>
 
+
+#include <QEventLoop>
+#include <QTimer>
+
+
 class Model;
 
 class View : public QWidget
@@ -23,12 +28,14 @@ protected:
 public:
     View(QWidget *parent = nullptr);
     void setModel(Model *model);
+    void moveAnimation();
 
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
 
     void mouseReleaseEvent(QMouseEvent *event) override;
+
 };
 
 #endif // VIEW_H

@@ -37,11 +37,11 @@ public:
     }
     void setY(int y)
     {
-        _y=y;
+        _y = y;
     }
     void setX(int x)
     {
-        _x=x;
+        _x = x;
     }
 
     bool visited() const
@@ -107,6 +107,7 @@ class Model : public QObject
     void clear();
 public:
 
+
     Model(int col = 10, int row = 10, QObject *parent = nullptr);
 
     Gridtype& getGrid();
@@ -115,6 +116,22 @@ public:
     void addFigures(int row, int col, FigureType figureType);
     int checkAndDeleteLines(int row, int col);
     void resize(int row, int col);
+    int fromRow() const
+    {
+        return _fromRow;
+    }
+    int fromCol() const
+    {
+        return _fromCol;
+    }
+    int toRow() const
+    {
+        return _toRow;
+    }
+    int toCol() const
+    {
+        return _toCol;
+    }
     void setFrom(int row, int col)
     {
         _fromCol = col;
@@ -137,7 +154,7 @@ public:
         }
     }
 
-    void doStep()
+    bool doStep()
     {
         if(bfs())
         {
@@ -145,10 +162,12 @@ public:
             {
                 if (!checkAndDeleteLines(_toRow, _toCol))
                 {
-                    addRandomFigures(3);
+                    //addRandomFigures(3);
                 }
+                return true;
             }
         }
+        return false;
     }
 
     void clearVisited()
