@@ -6,36 +6,33 @@
 #include <QEvent>
 #include <QDebug>
 
-
 #include <QEventLoop>
 #include <QTimer>
 
 
 class Model;
+class Cell;
 
 class View : public QWidget
 {
     Q_OBJECT
+    static constexpr size_t cellSize = 50;
     Model *_model;
 
+    void moveAnimation();
+
+    void drawFigure(Cell cell, QPainter *painter);
 protected:
-    static constexpr size_t cellSize = 50;
-
-    virtual void paintEvent(QPaintEvent *event)         override;
     void drawScene(QPainter *painter);
-
 
 public:
     View(QWidget *parent = nullptr);
     void setModel(Model *model);
-    void moveAnimation();
-
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
+    void paintEvent(QPaintEvent *event)         override;
+    void mousePressEvent(QMouseEvent *event)    override;
+    void mouseReleaseEvent(QMouseEvent *event)  override;
 };
 
 #endif // VIEW_H

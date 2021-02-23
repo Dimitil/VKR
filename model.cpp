@@ -5,10 +5,11 @@
 Model::Model(int col, int row, QObject *parent) : QObject(parent),
     _col(col), _row(row)
 {
-    for(int i = 0; i < row; i++)
+    for(int r = 0; r < row; r++)
     {
         _grid.push_back(QVector<Cell>(col, FigureType::EMPTY));
     }
+    coordinateAllCells();
 }
 
 void Model::resize(int row, int col)
@@ -22,6 +23,153 @@ void Model::resize(int row, int col)
         _grid[r].resize(col);
         _grid[r].fill(FigureType::EMPTY);
     }
+    coordinateAllCells();
+}
+
+int Model::fromRow() const
+{
+    return _fromRow;
+}
+
+int Model::fromCol() const
+{
+    return _fromCol;
+}
+
+int Model::toRow() const
+{
+    return _toRow;
+}
+
+int Model::toCol() const
+{
+    return _toCol;
+}
+
+int Model::row() const
+{
+    return _row;
+}
+
+int Model::col() const
+{
+    return _col;
+}
+
+void Model::setFrom(int row, int col)
+{
+    _fromCol = col;
+    _fromRow = row;
+}
+
+void Model::setTo(int row, int col)
+{
+    _toCol = col;
+    _toRow = row;
+}
+
+void Model::coordinateAllCells()
+{
+    for(int r = 0; r < _row; r++)
+    {
+        for(int c = 0; c < _col; c++)
+        {
+            _grid[r][c].setY(r);
+            _grid[r][c].setX(c);
+        }
+    }
+}
+
+bool Model::doStep()
+{
+    if(bfs())
+    {
+        if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
+        {
+            if (!checkAndDeleteLines(_toRow, _toCol))
+            {
+                //addRandomFigures(3);
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void Model::clearVisited()
+{
+    for (int r = 0; r < _row; r++)
+    {
+        for(int c = 0; c < _col; c++)
+        {
+            _grid[r][c].setVisited(false);
+        }
+    }
+}
+
+void Model::addNeighbors(Cell *cell, QQueue<Cell *> &q)
+{
+    //add left
+    int x = cell->x();
+    int y = cell->y();
+    if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
+          _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
+         ((y == _fromRow) && ((x-1) == _fromCol)))
+    {
+        Cell* left = &_grid[y][x - 1];
+        left->setParent(&_grid[y][x]);
+        left->setVisited(true);
+        q.push_back(left);
+    }
+    //add right
+    if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
+         _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
+            ((y == _fromRow) && ((x+1) == _fromCol)))
+    {
+        Cell* right = &_grid[y][x + 1];
+        right->setParent(&_grid[y][x]);
+        right->setVisited(true);
+        q.push_back(right);
+    }
+    //add up
+    if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
+          _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
+         (((y-1) == _fromRow) && (x == _fromCol)))
+    {
+        Cell* up = &_grid[y - 1][x];
+        up->setParent(&_grid[y][x]);
+        up->setVisited(true);
+        q.push_back(up);
+    }
+    //add down
+    if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
+          _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
+         (((y+1) == _fromRow) && (x == _fromCol)))
+    {
+        Cell* down = &_grid[y + 1][x];
+        down->setVisited(true);
+        down->setParent(&_grid[y][x]);
+        q.push_back(down);
+    }
+}
+
+bool Model::bfs()
+{
+    clearVisited();
+    QQueue <Cell*> q;
+    q.push_back(&_grid[_toRow][_toCol]);
+    _grid[_toRow][_toCol].setVisited(true);
+    while(!q.empty())
+    {
+        Cell* cell = q.back();
+        q.pop_back();
+        if (cell == &_grid[_fromRow][_fromCol])
+        {
+            return true;
+        }
+        addNeighbors(cell, q);
+    }
+    return false;
 }
 
 Gridtype &Model::getGrid() { return _grid;}
@@ -64,7 +212,6 @@ bool Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
     if ( (_grid[oldRow][oldCol].cellType() != FigureType::EMPTY) and
          (_grid[newRow][newCol].cellType() == FigureType::EMPTY) )
     {
-        //std::swap(_grid[oldRow][oldCol], _grid[newRow][newCol]);
         FigureType ft = _grid[oldRow][oldCol].cellType();
         _grid[oldRow][oldCol].setType(FigureType::EMPTY);
         _grid[newRow][newCol].setType(ft);
@@ -234,6 +381,15 @@ void Model::leftDiagonalCheck(QSet<Cell*> &set, int row, int col)
             set.insert(&_grid[up + i][right - i]);
         }
     }
+}
+
+int Model::deleteSet(QSet<Cell *> &set)
+{
+    for (auto &cell : set)
+    {
+        cell->setType(FigureType::EMPTY);
+    }
+    return set.size();
 }
 
 void Model::addScore(int deletedCells)
