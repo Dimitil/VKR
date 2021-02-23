@@ -26,21 +26,25 @@ class Model : public QObject
     int _toCol;
     int _toRow;
 
+    bool (Model::*_algorithm)();
+    void setAlgorithm(bool (Model::*algorithm)())
+    {
+        _algorithm = algorithm;
+    }
     void horizontalCheck(QSet<Cell*> &set, int row, int col);
     void verticalCheck(QSet<Cell*> &set, int row, int col);
     void rightDiagonalCheck(QSet<Cell*> &set, int row, int col);
     void leftDiagonalCheck(QSet<Cell*> &set, int row, int col);
     int deleteSet(QSet<Cell*> &set);
     void addScore(int score);
-    void coordinateAllCells();  //debug
+    void coordinateAllCells();
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
     void clear();
     void clearVisited();
     void addNeighbors(Cell* cell, QQueue<Cell*> &q);
     bool bfs(); //pathfinding algorithm
+
 public:
-
-
 
     Model(int col = 10, int row = 10, QObject *parent = nullptr);
 

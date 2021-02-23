@@ -10,6 +10,7 @@ void View::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     drawScene(&painter);
+    event->accept();
 }
 
 void View::drawScene(QPainter *painter)

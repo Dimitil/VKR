@@ -10,6 +10,7 @@ Model::Model(int col, int row, QObject *parent) : QObject(parent),
         _grid.push_back(QVector<Cell>(col, FigureType::EMPTY));
     }
     coordinateAllCells();
+    setAlgorithm(&Model::bfs);  //debug()
 }
 
 void Model::resize(int row, int col)
@@ -82,7 +83,7 @@ void Model::coordinateAllCells()
 
 bool Model::doStep()
 {
-    if(bfs())
+    if((this->*_algorithm)())
     {
         if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
         {
