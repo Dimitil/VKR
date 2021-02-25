@@ -16,10 +16,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->scene->setFixedSize(QSize(
                                 model->getGrid().size()*50+1, model->getGrid()[0].size()*50+1)); //FIXME
 
-    model->addRandomFigures(50);       //debug
+    model->addRandomFigures(30);       //debug
 
 
     connect(model, &Model::scoreChanged, ui->scoreDisplay,  QOverload<int>::of(&QLCDNumber::display));
+    connect(ui->bfsPushButton, SIGNAL(clicked()), model, SLOT(setBfsAlgorithm()));
+    connect(ui->bestFirstPushButton, SIGNAL(clicked()), model, SLOT(setBestFirstAlgorithm()));
 }
 
 MainWindow::~MainWindow()

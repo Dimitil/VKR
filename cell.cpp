@@ -41,9 +41,19 @@ void Cell::setParent(Cell *newParent)
     _parent = newParent;
 }
 
+void Cell::setHeuristic(int heuristic)
+{
+    _heuristic = heuristic;
+}
+
 Cell *Cell::cellParent() const
 {
     return _parent;
+}
+
+int Cell::heuristic() const
+{
+    return _heuristic;
 }
 
 Cell::Cell(FigureType type) : _type(type) {}

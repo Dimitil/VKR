@@ -24,15 +24,34 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="scoreDisplay">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>100</y>
-      <width>64</width>
-      <height>23</height>
+      <x>60</x>
+      <y>80</y>
+      <width>82</width>
+      <height>85</height>
      </rect>
     </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLCDNumber" name="scoreDisplay"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bfsPushButton">
+       <property name="text">
+        <string>BFS</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="bestFirstPushButton">
+       <property name="text">
+        <string>Best-First</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

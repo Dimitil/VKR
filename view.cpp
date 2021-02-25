@@ -47,7 +47,7 @@ void View::moveAnimation()
     {
         cell->setType(FigureType::FIVE);
         repaint();
-        std::this_thread::sleep_for(std::chrono::milliseconds(400) );
+        std::this_thread::sleep_for(std::chrono::milliseconds(100) );
         cell->setType(FigureType::EMPTY);
         cell = cell->cellParent();
         cell->setType(ft);

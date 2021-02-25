@@ -10,7 +10,7 @@ Model::Model(int col, int row, QObject *parent) : QObject(parent),
         _grid.push_back(QVector<Cell>(col, FigureType::EMPTY));
     }
     coordinateAllCells();
-    setAlgorithm(&Model::bfs);  //debug()
+    setBfsAlgorithm();  //debug()
 }
 
 void Model::resize(int row, int col)
@@ -108,11 +108,12 @@ void Model::clearVisited()
     }
 }
 
-void Model::addNeighbors(Cell *cell, QQueue<Cell *> &q)
+void Model::addNeighborsBFS(Cell *cell, QQueue<Cell*> &q)
 {
     //add left
     int x = cell->x();
     int y = cell->y();
+
     if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
           _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
          ((y == _fromRow) && ((x-1) == _fromCol)))
@@ -168,7 +169,7 @@ bool Model::bfs()
         {
             return true;
         }
-        addNeighbors(cell, q);
+        addNeighborsBFS(cell, q);
     }
     return false;
 }
