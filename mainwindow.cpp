@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(model, &Model::scoreChanged, ui->scoreDisplay,  QOverload<int>::of(&QLCDNumber::display));
     connect(ui->bfsPushButton, SIGNAL(clicked()), model, SLOT(setBfsAlgorithm()));
     connect(ui->bestFirstPushButton, SIGNAL(clicked()), model, SLOT(setBestFirstAlgorithm()));
+    connect(ui->aStarPushButton, SIGNAL(clicked()), model, SLOT(setAStarAlgorithm()));
 }
 
 MainWindow::~MainWindow()

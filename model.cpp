@@ -97,6 +97,18 @@ bool Model::doStep()
     return false;
 }
 
+void Model::setBfsAlgorithm()
+{
+    _algorithm = &Model::bfs;
+    qDebug() << "setup bfs";
+}
+
+void Model::setBestFirstAlgorithm()
+{
+    _algorithm = &Model::bestFirst;
+    qDebug() << "setup bestFirst";
+}
+
 void Model::clearVisited()
 {
     for (int r = 0; r < _row; r++)
@@ -155,6 +167,60 @@ void Model::addNeighborsBFS(Cell *cell, QQueue<Cell*> &q)
     }
 }
 
+void Model::addNeighborsBestFirst(Cell *cell, std::priority_queue<Cell *, QVector<Cell *>, comparatorBestFirst> &q)
+{
+    //add left
+    int x = cell->x();
+    int y = cell->y();
+    if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
+          _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
+         ((y == _fromRow) && ((x-1) == _fromCol)))
+    {
+        Cell* left = &_grid[y][x - 1];
+        left->setParent(&_grid[y][x]);
+        left->setVisited(true);
+        int heuristic = abs(left->x() - _fromCol) + abs(left->y() - _fromRow);
+        left->setHeuristic(heuristic);
+        q.push(left);
+    }
+    //add right
+    if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
+         _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
+            ((y == _fromRow) && ((x+1) == _fromCol)))
+    {
+        Cell* right = &_grid[y][x + 1];
+        right->setParent(&_grid[y][x]);
+        right->setVisited(true);
+        int heuristic = abs(right->x() - _fromCol) + abs(right->y() - _fromRow);
+        right->setHeuristic(heuristic);
+        q.push(right);
+    }
+    //add up
+    if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
+          _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
+         (((y-1) == _fromRow) && (x == _fromCol)))
+    {
+        Cell* up = &_grid[y - 1][x];
+        up->setParent(&_grid[y][x]);
+        up->setVisited(true);
+        int heuristic = abs(up->x() - _fromCol) + abs(up->y() - _fromRow);
+        up->setHeuristic(heuristic);
+        q.push(up);
+    }
+    //add down
+    if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
+          _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
+         (((y+1) == _fromRow) && (x == _fromCol)))
+    {
+        Cell* down = &_grid[y + 1][x];
+        down->setVisited(true);
+        int heuristic = abs(down->x() - _fromCol) + abs(down->y() - _fromRow);
+        down->setHeuristic(heuristic);
+        down->setParent(&_grid[y][x]);
+        q.push(down);
+    }
+}
+
 bool Model::bfs()
 {
     clearVisited();
@@ -170,6 +236,28 @@ bool Model::bfs()
             return true;
         }
         addNeighborsBFS(cell, q);
+    }
+    return false;
+}
+
+bool Model::bestFirst() //pathfinding algorithm
+{
+    clearVisited();
+    std::priority_queue <Cell*, QVector<Cell*>, comparatorBestFirst> pq;
+    Cell *start = &_grid[_toRow][_toCol];
+    int heuristic = abs(_fromCol - start->x()) + abs(_fromRow - start->y());
+    start->setHeuristic(heuristic);
+    pq.push(&_grid[_toRow][_toCol]);
+    _grid[_toRow][_toCol].setVisited(true);
+    while(!pq.empty())
+    {
+        Cell* cell = pq.top();
+        pq.pop();
+        if (cell == &_grid[_fromRow][_fromCol])
+        {
+            return true;
+        }
+        addNeighborsBestFirst(cell, pq);
     }
     return false;
 }

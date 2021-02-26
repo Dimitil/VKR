@@ -16,6 +16,7 @@ class Cell{
     Cell* _parent = nullptr;
     bool _visited = false;
     int _heuristic;
+    int _moveCost;
     int _y;
     int _x;
 
@@ -28,12 +29,20 @@ public:
     bool visited() const;
     Cell* cellParent() const;
     int heuristic() const;
+    int moveCost() const
+    {
+        return _moveCost;
+    }
     void setY(int y);
     void setX(int x);
     void setVisited(bool b);
     void setType(FigureType type);
     void setParent(Cell* newParent);
     void setHeuristic(int heuristic);
+    void setMoveCost(int moveCost)
+    {
+        _moveCost = moveCost;
+    }
 };
 
 #endif // CELL_H

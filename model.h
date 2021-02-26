@@ -10,11 +10,20 @@
 #include <queue>
 #include "cell.h"
 
-struct compare{
+struct comparatorBestFirst{
     bool operator()(const Cell* l, const Cell* r)
     {
         return l->heuristic() > r->heuristic();
     };
+};
+
+struct comparatorAStar{
+    bool operator()(const Cell* l, const Cell* r)
+    {
+        int lSum = l->heuristic() + l->moveCost();
+        int rSum = r->heuristic() + r->moveCost();
+        return lSum > rSum;
+    }
 };
 
 using Gridtype = QVector<QVector<Cell>>;
@@ -45,84 +54,24 @@ class Model : public QObject
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
     void clear();
     void clearVisited();
-    void addNeighborsBFS(Cell* cell, QQueue<Cell*> &q);
-    void addNeighborsBestFirst(Cell* cell, std::priority_queue<Cell*, QVector<Cell*>, compare> &q)
+    void clearMoveCost()
     {
-        //add left
-        int x = cell->x();
-        int y = cell->y();
-        if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
-              _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
-             ((y == _fromRow) && ((x-1) == _fromCol)))
+        for (int r = 0; r < _row; r++)
         {
-            Cell* left = &_grid[y][x - 1];
-            left->setParent(&_grid[y][x]);
-            left->setVisited(true);
-            int heuristic = abs(left->x() - _fromCol) + abs(left->y() - _fromRow);
-            left->setHeuristic(heuristic);
-            q.push(left);
-        }
-        //add right
-        if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
-             _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
-                ((y == _fromRow) && ((x+1) == _fromCol)))
-        {
-            Cell* right = &_grid[y][x + 1];
-            right->setParent(&_grid[y][x]);
-            right->setVisited(true);
-            int heuristic = abs(right->x() - _fromCol) + abs(right->y() - _fromRow);
-            right->setHeuristic(heuristic);
-            q.push(right);
-        }
-        //add up
-        if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
-              _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
-             (((y-1) == _fromRow) && (x == _fromCol)))
-        {
-            Cell* up = &_grid[y - 1][x];
-            up->setParent(&_grid[y][x]);
-            up->setVisited(true);
-            int heuristic = abs(up->x() - _fromCol) + abs(up->y() - _fromRow);
-            up->setHeuristic(heuristic);
-            q.push(up);
-        }
-        //add down
-        if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
-              _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
-             (((y+1) == _fromRow) && (x == _fromCol)))
-        {
-            Cell* down = &_grid[y + 1][x];
-            down->setVisited(true);
-            int heuristic = abs(down->x() - _fromCol) + abs(down->y() - _fromRow);
-            down->setHeuristic(heuristic);
-            down->setParent(&_grid[y][x]);
-            q.push(down);
+            for(int c = 0; c < _col; c++)
+            {
+                _grid[r][c].setMoveCost(99999);
+            }
         }
     }
-
-    bool bfs(); //pathfinding algorithm
-    bool bestFirst() //pathfinding algorithm
+    void addNeighborsBFS(Cell* cell, QQueue<Cell*> &q); //заменить все эти три функции на одну - возвращающую вектор соседей
+    //специфические действия вынести в функции алгоритмов
+    void addNeighborsBestFirst(Cell* cell, std::priority_queue<Cell*, QVector<Cell*>, comparatorBestFirst> &q);
+    bool bfs(); //pathfinding algorithms
+    bool bestFirst();
+    bool aStar()
     {
-        clearVisited();
 
-
-        std::priority_queue <Cell*, QVector<Cell*>, compare> pq;
-        Cell *start = &_grid[_toRow][_toCol];
-        int heuristic = abs(_fromCol - start->x()) + abs(_fromRow - start->y());
-        start->setHeuristic(heuristic);
-        pq.push(&_grid[_toRow][_toCol]);
-        _grid[_toRow][_toCol].setVisited(true);
-        while(!pq.empty())
-        {
-            Cell* cell = pq.top();
-            pq.pop();
-            if (cell == &_grid[_fromRow][_fromCol])
-            {
-                return true;
-            }
-            addNeighborsBestFirst(cell, pq);
-        }
-        return false;
     }
 
 public:
@@ -148,15 +97,12 @@ signals:
     void scoreChanged(int newScore);
 
 public slots:
-    void setBfsAlgorithm()
+    void setBfsAlgorithm();
+    void setBestFirstAlgorithm();
+    void setAStarAlgorithm()
     {
-        _algorithm = &Model::bfs;
-        qDebug() << "setup bfs";
-    }
-    void setBestFirstAlgorithm()
-    {
-        _algorithm = &Model::bestFirst;
-        qDebug() << "setup bestFirst";
+        _algorithm = &Model::aStar;
+        qDebug() << "A*";
     }
 };
 

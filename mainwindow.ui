@@ -27,10 +27,10 @@
    <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>80</y>
+      <x>61</x>
+      <y>81</y>
       <width>82</width>
-      <height>85</height>
+      <height>115</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -48,6 +48,13 @@
       <widget class="QPushButton" name="bestFirstPushButton">
        <property name="text">
         <string>Best-First</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="aStarPushButton">
+       <property name="text">
+        <string>A*</string>
        </property>
       </widget>
      </item>
