@@ -54,24 +54,57 @@ class Model : public QObject
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
     void clear();
     void clearVisited();
-    void clearMoveCost()
+    void clearMoveCost();
+    void clearParent()
     {
         for (int r = 0; r < _row; r++)
         {
             for(int c = 0; c < _col; c++)
             {
-                _grid[r][c].setMoveCost(99999);
+                _grid[r][c].setParent(nullptr);
             }
         }
     }
-    void addNeighborsBFS(Cell* cell, QQueue<Cell*> &q); //заменить все эти три функции на одну - возвращающую вектор соседей
-    //специфические действия вынести в функции алгоритмов
-    void addNeighborsBestFirst(Cell* cell, std::priority_queue<Cell*, QVector<Cell*>, comparatorBestFirst> &q);
+    QVector<Cell*> neighbors(Cell* cell);
+
     bool bfs(); //pathfinding algorithms
     bool bestFirst();
     bool aStar()
     {
+        clearMoveCost();
 
+        std::priority_queue <Cell*, QVector<Cell*>, comparatorAStar> pq;
+        Cell *start = &_grid[_toRow][_toCol];
+        Cell * goal = &_grid[_fromRow][_fromCol];
+        int heuristic = abs(_fromCol - start->x()) + abs(_fromRow - start->y());
+        int moveCost = 1;
+        start->setHeuristic(heuristic);
+        start->setMoveCost(moveCost);
+        pq.push(start);
+
+        while(!pq.empty())
+        {
+            Cell* cell = pq.top();
+            pq.pop();
+            if (cell == goal)
+            {
+                return true;
+            }
+
+            for (auto& next : neighbors(cell))
+            {
+                moveCost ++;
+                if( !next->moveCost() || ( next->moveCost() > moveCost) )
+                {
+                    int heuristic = abs(next->x() - _fromCol) + abs(next->y() - _fromRow);
+                    next->setParent(cell);
+                    next->setHeuristic(heuristic);
+                    next->setMoveCost(moveCost);
+                    pq.push(next);
+                }
+            }
+        }
+        return false;
     }
 
 public:
@@ -99,11 +132,7 @@ signals:
 public slots:
     void setBfsAlgorithm();
     void setBestFirstAlgorithm();
-    void setAStarAlgorithm()
-    {
-        _algorithm = &Model::aStar;
-        qDebug() << "A*";
-    }
+    void setAStarAlgorithm();
 };
 
 #endif // MODEL_H

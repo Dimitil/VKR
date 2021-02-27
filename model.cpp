@@ -109,6 +109,12 @@ void Model::setBestFirstAlgorithm()
     qDebug() << "setup bestFirst";
 }
 
+void Model::setAStarAlgorithm()
+{
+    _algorithm = &Model::aStar;
+    qDebug() << "setup A*";
+}
+
 void Model::clearVisited()
 {
     for (int r = 0; r < _row; r++)
@@ -120,122 +126,74 @@ void Model::clearVisited()
     }
 }
 
-void Model::addNeighborsBFS(Cell *cell, QQueue<Cell*> &q)
+void Model::clearMoveCost()
 {
-    //add left
-    int x = cell->x();
-    int y = cell->y();
-
-    if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
-          _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
-         ((y == _fromRow) && ((x-1) == _fromCol)))
+    for (int r = 0; r < _row; r++)
     {
-        Cell* left = &_grid[y][x - 1];
-        left->setParent(&_grid[y][x]);
-        left->setVisited(true);
-        q.push_back(left);
-    }
-    //add right
-    if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
-         _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
-            ((y == _fromRow) && ((x+1) == _fromCol)))
-    {
-        Cell* right = &_grid[y][x + 1];
-        right->setParent(&_grid[y][x]);
-        right->setVisited(true);
-        q.push_back(right);
-    }
-    //add up
-    if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
-          _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
-         (((y-1) == _fromRow) && (x == _fromCol)))
-    {
-        Cell* up = &_grid[y - 1][x];
-        up->setParent(&_grid[y][x]);
-        up->setVisited(true);
-        q.push_back(up);
-    }
-    //add down
-    if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
-          _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
-         (((y+1) == _fromRow) && (x == _fromCol)))
-    {
-        Cell* down = &_grid[y + 1][x];
-        down->setVisited(true);
-        down->setParent(&_grid[y][x]);
-        q.push_back(down);
+        for(int c = 0; c < _col; c++)
+        {
+            _grid[r][c].setMoveCost(0);
+        }
     }
 }
 
-void Model::addNeighborsBestFirst(Cell *cell, std::priority_queue<Cell *, QVector<Cell *>, comparatorBestFirst> &q)
+QVector<Cell *> Model::neighbors(Cell *cell)
 {
-    //add left
+    QVector <Cell*> neighbors;
     int x = cell->x();
     int y = cell->y();
-    if ( (((x - 1) >= 0) && !_grid[y][x-1].visited() &&
-          _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
+    //add left
+    if ( (((x - 1) >= 0) && _grid[y][x - 1].cellType() == FigureType::EMPTY) ||
          ((y == _fromRow) && ((x-1) == _fromCol)))
     {
-        Cell* left = &_grid[y][x - 1];
-        left->setParent(&_grid[y][x]);
-        left->setVisited(true);
-        int heuristic = abs(left->x() - _fromCol) + abs(left->y() - _fromRow);
-        left->setHeuristic(heuristic);
-        q.push(left);
+        neighbors.push_back(&_grid[y][x - 1]);
     }
     //add right
-    if( (((x + 1) < _col) && !_grid[y][x + 1].visited() &&
-         _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
+    if( (((x + 1) < _col) && _grid[y][x + 1].cellType() == FigureType::EMPTY) ||
             ((y == _fromRow) && ((x+1) == _fromCol)))
     {
-        Cell* right = &_grid[y][x + 1];
-        right->setParent(&_grid[y][x]);
-        right->setVisited(true);
-        int heuristic = abs(right->x() - _fromCol) + abs(right->y() - _fromRow);
-        right->setHeuristic(heuristic);
-        q.push(right);
+        neighbors.push_back(&_grid[y][x + 1]);
     }
     //add up
-    if ( (((y - 1) >= 0) && !_grid[y -1][x].visited() &&
-          _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
+    if ( (((y - 1) >= 0) && _grid[y - 1][x].cellType() == FigureType::EMPTY) ||
          (((y-1) == _fromRow) && (x == _fromCol)))
     {
-        Cell* up = &_grid[y - 1][x];
-        up->setParent(&_grid[y][x]);
-        up->setVisited(true);
-        int heuristic = abs(up->x() - _fromCol) + abs(up->y() - _fromRow);
-        up->setHeuristic(heuristic);
-        q.push(up);
+        neighbors.push_back(&_grid[y - 1][x]);
     }
     //add down
-    if ( (((y + 1) < _row) && !_grid[y + 1][x].visited() &&
-          _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
+    if ( (((y + 1) < _row) && _grid[y + 1][x].cellType() == FigureType::EMPTY) ||
          (((y+1) == _fromRow) && (x == _fromCol)))
     {
-        Cell* down = &_grid[y + 1][x];
-        down->setVisited(true);
-        int heuristic = abs(down->x() - _fromCol) + abs(down->y() - _fromRow);
-        down->setHeuristic(heuristic);
-        down->setParent(&_grid[y][x]);
-        q.push(down);
+        neighbors.push_back(&_grid[y + 1][x]);
     }
+    return neighbors;
 }
 
 bool Model::bfs()
 {
     clearVisited();
     QQueue <Cell*> q;
-    q.push_back(&_grid[_toRow][_toCol]);
-    _grid[_toRow][_toCol].setVisited(true);
+    Cell* start = &_grid[_toRow][_toCol];
+    Cell* goal = &_grid[_fromRow][_fromCol];
+    start->setVisited(true);
+    q.push_back(start);
     while(!q.empty())
     {
         Cell* cell = q.back();
         q.pop_back();
-        if (cell == &_grid[_fromRow][_fromCol])
+        if (cell == goal)
         {
             return true;
         }
-        addNeighborsBFS(cell, q);
+        for (auto& next : neighbors(cell) )
+        {
+            if (!next->visited())
+            {
+                next->setVisited(true);
+                next->setParent(cell);
+                q.push_back(next);
+            }
+        }
     }
     return false;
 }
@@ -245,19 +203,31 @@ bool Model::bestFirst() //pathfinding algorithm
     clearVisited();
     std::priority_queue <Cell*, QVector<Cell*>, comparatorBestFirst> pq;
     Cell *start = &_grid[_toRow][_toCol];
+    Cell *goal = &_grid[_fromRow][_fromCol];
     int heuristic = abs(_fromCol - start->x()) + abs(_fromRow - start->y());
     start->setHeuristic(heuristic);
-    pq.push(&_grid[_toRow][_toCol]);
-    _grid[_toRow][_toCol].setVisited(true);
+    start->setVisited(true);
+    pq.push(start);
+
     while(!pq.empty())
     {
         Cell* cell = pq.top();
         pq.pop();
-        if (cell == &_grid[_fromRow][_fromCol])
+        if (cell == goal)
         {
             return true;
         }
-        addNeighborsBestFirst(cell, pq);
+        for (auto& next : neighbors(cell))
+        {
+            if( !next->visited())
+            {
+                int heuristic = abs(next->x() - _fromCol) + abs(next->y() - _fromRow);
+                next->setVisited(true);
+                next->setParent(cell);
+                next->setHeuristic(heuristic);
+                pq.push(next);
+            }
+        }
     }
     return false;
 }
