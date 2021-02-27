@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QColor>
+#include <random>
 
 #include <QVector>
 #include <QSet>
@@ -18,7 +19,8 @@ using Gridtype = QVector<QVector<Cell>>;
 enum class DifficultyType{
     EAZY,
     NORMAL,
-    HARD
+    HARD,
+    EXTRAHARD
 };
 
 class Model : public QObject
@@ -33,8 +35,10 @@ class Model : public QObject
     int _fromRow;
     int _toCol;
     int _toRow;
+    bool _testMode;
     bool (Model::*_algorithm)();
     DifficultyType _difficulty;
+    std::mt19937 _mt_rand;
     Gridtype _grid;
 
     void horizontalCheck(QSet<Cell*> &set, int row, int col);
@@ -56,6 +60,15 @@ class Model : public QObject
     void clearParent();
 
     int maxTypeCount();
+    FigureType getRandomType();
+    int getRandomCol()
+    {
+        return _mt_rand() % _col;
+    }
+    int getRandomRow()
+    {
+        return _mt_rand() % _col;
+    }
 
     bool bfs(); //pathfinding algorithms
     bool bestFirst();
@@ -67,7 +80,7 @@ public:
     Model(QObject *parent = nullptr);
 
     void addRandomFigures(int num);
-    void addFigures(int row, int col, FigureType figureType);
+    void addRandomFigure(int row, int col);
     void setFrom(int row, int col);
     void setTo(int row, int col);
 
@@ -79,6 +92,8 @@ public:
     int row() const;
     int col() const;
     int score() const;
+    void testModeOn();
+    void testModeOff();
 
     bool doStep();
 
@@ -94,6 +109,24 @@ public slots:
     void setEazyDifficulty();
     void setNormalDifficulty();
     void setHardDifficulty();
+    void setExtraHardDifficulty();
+
+    void testCase1(){
+        testModeOn();
+        resize(12, 12);
+        clear();
+        for ( int i = 2; i<10; i++)
+        {
+           addRandomFigure(2, i);
+           addRandomFigure(_row - 3, i);
+        }
+        for (int i = 2; i < _row - 2; i++)
+        {
+            addRandomFigure(i, _col - 3);
+        }
+        addRandomFigure(_row - 3, 1);
+        emit difficultyChanged();
+    }
 };
 
 #endif // MODEL_H

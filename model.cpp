@@ -4,6 +4,8 @@
 
 Model::Model(QObject *parent) : QObject(parent), _col(0), _row(0)
 {
+    _mt_rand.seed(time(nullptr));
+    _testMode = false;
     setBfsAlgorithm();
     setNormalDifficulty();
 }
@@ -19,7 +21,7 @@ void Model::resize(int row, int col)
         _grid[r].resize(col);
         _grid[r].fill(FigureType::EMPTY);
     }
-    coordinateAllCells();
+    coordinateAllCells();  
 }
 
 int Model::fromRow() const
@@ -57,6 +59,16 @@ int Model::score() const
     return _score;
 }
 
+void Model::testModeOn()
+{
+    _testMode = true;
+}
+
+void Model::testModeOff()
+{
+    _testMode = false;
+}
+
 void Model::setFrom(int row, int col)
 {
     _fromCol = col;
@@ -92,7 +104,7 @@ bool Model::doStep()
     {
         if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
         {
-            if (!checkAndDeleteLines(_toRow, _toCol))
+            if (!checkAndDeleteLines(_toRow, _toCol) && !_testMode)
             {
                 addRandomFigures(3);
             }
@@ -123,6 +135,7 @@ void Model::setAStarAlgorithm()
 void Model::setEazyDifficulty()
 {
     _difficulty = DifficultyType::EAZY;
+    testModeOff();
     resize(4, 4);
     setEqualCount(3);
     addRandomFigures(3);
@@ -133,6 +146,7 @@ void Model::setEazyDifficulty()
 void Model::setNormalDifficulty()
 {
     _difficulty = DifficultyType::NORMAL;
+    testModeOff();
     resize(6, 6);
     setEqualCount(4);
     addRandomFigures(3);
@@ -143,9 +157,21 @@ void Model::setNormalDifficulty()
 void Model::setHardDifficulty()
 {
     _difficulty = DifficultyType::HARD;
+    testModeOff();
     resize(8, 8);
     setEqualCount(5);
     addRandomFigures(3);
+    setScore(0);
+    emit difficultyChanged();
+}
+
+void Model::setExtraHardDifficulty()
+{
+    _difficulty = DifficultyType::EXTRAHARD;
+    testModeOff();
+    resize(12, 12);
+    setEqualCount(5);
+    addRandomFigures(5);
     setScore(0);
     emit difficultyChanged();
 }
@@ -192,7 +218,19 @@ int Model::maxTypeCount(){
         return 5;
     case DifficultyType::HARD:
         return 6;
+    case DifficultyType::EXTRAHARD:
+        return 6;
+    default:
+        return 0;
     }
+    return 0;
+}
+
+FigureType Model::getRandomType()
+{
+    int t = _mt_rand() % maxTypeCount() + 1;
+    FigureType ft = static_cast<FigureType>(t);
+    return ft;
 }
 
 QVector<Cell *> Model::neighbors(Cell *cell)
@@ -347,22 +385,20 @@ void Model::clear()
     }
 }
 
+
+
 void Model::addRandomFigures(int num)
 {
-    std::mt19937 mt_rand(time(nullptr));
     for (int i = 0 ; i < num; i++)
     {
-        int t = mt_rand() % maxTypeCount() + 1;
-
         int r = 0;
         int c = 0;
         do {
-            r = mt_rand() % _row;
-            c = mt_rand() % _col;
+            r = getRandomRow();
+            c = getRandomCol();
         }
         while( _grid[r][c].cellType() != FigureType::EMPTY );
-        FigureType newType = static_cast<FigureType>(t);
-        _grid[r][c].setType(newType);
+        _grid[r][c].setType(getRandomType());
         if (checkAndDeleteLines(r, c))
         {
             --i;
@@ -383,9 +419,9 @@ bool Model::moveTo(int oldRow, int oldCol, int newRow, int newCol)
     return false;
 }
 
-void Model::addFigures(int row, int col, FigureType figureType)
+void Model::addRandomFigure(int row, int col)
 {
-    _grid[row][col].setType(figureType);
+    _grid[row][col].setType(getRandomType());
 }
 
 int Model::checkAndDeleteLines(int row, int col)

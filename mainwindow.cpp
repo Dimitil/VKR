@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "view.h"
 #include "model.h"
+#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,7 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->eazyPushButton, SIGNAL(clicked()), model, SLOT(setEazyDifficulty()));
     connect(ui->normalPushButton, SIGNAL(clicked()), model, SLOT(setNormalDifficulty()));
     connect(ui->hardPushButton, SIGNAL(clicked()), model, SLOT(setHardDifficulty()));
+    connect(ui->extraHardPushButton, SIGNAL(clicked()), model, SLOT(setExtraHardDifficulty()));
     connect(model, SIGNAL(difficultyChanged()), ui->scene, SLOT(setFixedSize()));
+
+    QAction *case1 = ui->menubar->addAction("Case 1");
+    connect(case1, SIGNAL(triggered()), model, SLOT(testCase1()));
 
     setFixedSize(minimumSize());
     emit model->difficultyChanged();

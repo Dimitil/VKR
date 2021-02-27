@@ -1,7 +1,7 @@
 #ifndef CELL_H
 #define CELL_H
 
-enum class FigureType
+enum class FigureType : char
 {
     EMPTY,
     ONE,
