@@ -74,6 +74,7 @@ class Model : public QObject
     bool bestFirst();
     bool aStar();
     QVector<Cell*> neighbors(Cell* cell);
+
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
 
 public:
@@ -111,22 +112,7 @@ public slots:
     void setHardDifficulty();
     void setExtraHardDifficulty();
 
-    void testCase1(){
-        testModeOn();
-        resize(12, 12);
-        clear();
-        for ( int i = 2; i<10; i++)
-        {
-           addRandomFigure(2, i);
-           addRandomFigure(_row - 3, i);
-        }
-        for (int i = 2; i < _row - 2; i++)
-        {
-            addRandomFigure(i, _col - 3);
-        }
-        addRandomFigure(_row - 3, 1);
-        emit difficultyChanged();
-    }
+    void testCase1();
 };
 
 #endif // MODEL_H
