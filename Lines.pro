@@ -17,6 +17,7 @@ SOURCES += \
 
 HEADERS += \
     cell.h \
+    comparators.h \
     mainwindow.h \
     model.h \
     view.h

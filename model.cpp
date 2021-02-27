@@ -1,16 +1,11 @@
 #include "model.h"
 #include <QDebug>
+#include <random>
 
-
-Model::Model(int col, int row, QObject *parent) : QObject(parent),
-    _col(col), _row(row)
+Model::Model(QObject *parent) : QObject(parent), _col(0), _row(0)
 {
-    for(int r = 0; r < row; r++)
-    {
-        _grid.push_back(QVector<Cell>(col, FigureType::EMPTY));
-    }
-    coordinateAllCells();
-    setBfsAlgorithm();  //debug()
+    setBfsAlgorithm();
+    setNormalDifficulty();
 }
 
 void Model::resize(int row, int col)
@@ -57,6 +52,11 @@ int Model::col() const
     return _col;
 }
 
+int Model::score() const
+{
+    return _score;
+}
+
 void Model::setFrom(int row, int col)
 {
     _fromCol = col;
@@ -67,6 +67,11 @@ void Model::setTo(int row, int col)
 {
     _toCol = col;
     _toRow = row;
+}
+
+void Model::setEqualCount(int equalCount)
+{
+    _equalCount = equalCount;
 }
 
 void Model::coordinateAllCells()
@@ -89,7 +94,7 @@ bool Model::doStep()
         {
             if (!checkAndDeleteLines(_toRow, _toCol))
             {
-                //addRandomFigures(3);
+                addRandomFigures(3);
             }
             return true;
         }
@@ -115,6 +120,36 @@ void Model::setAStarAlgorithm()
     qDebug() << "setup A*";
 }
 
+void Model::setEazyDifficulty()
+{
+    _difficulty = DifficultyType::EAZY;
+    resize(4, 4);
+    setEqualCount(3);
+    addRandomFigures(3);
+    setScore(0);
+    emit difficultyChanged();
+}
+
+void Model::setNormalDifficulty()
+{
+    _difficulty = DifficultyType::NORMAL;
+    resize(6, 6);
+    setEqualCount(4);
+    addRandomFigures(3);
+    setScore(0);
+    emit difficultyChanged();
+}
+
+void Model::setHardDifficulty()
+{
+    _difficulty = DifficultyType::HARD;
+    resize(8, 8);
+    setEqualCount(5);
+    addRandomFigures(3);
+    setScore(0);
+    emit difficultyChanged();
+}
+
 void Model::clearVisited()
 {
     for (int r = 0; r < _row; r++)
@@ -134,6 +169,29 @@ void Model::clearMoveCost()
         {
             _grid[r][c].setMoveCost(0);
         }
+    }
+}
+
+void Model::clearParent()
+{
+    for (int r = 0; r < _row; r++)
+    {
+        for(int c = 0; c < _col; c++)
+        {
+            _grid[r][c].setParent(nullptr);
+        }
+    }
+}
+
+int Model::maxTypeCount(){
+    switch (_difficulty)
+    {
+    case DifficultyType::EAZY:
+        return 4;
+    case DifficultyType::NORMAL:
+        return 5;
+    case DifficultyType::HARD:
+        return 6;
     }
 }
 
@@ -232,6 +290,50 @@ bool Model::bestFirst() //pathfinding algorithm
     return false;
 }
 
+bool Model::aStar()
+{
+    clearMoveCost();
+
+    std::priority_queue <Cell*, QVector<Cell*>, comparatorAStar> pq;
+    Cell *start = &_grid[_toRow][_toCol];
+    Cell * goal = &_grid[_fromRow][_fromCol];
+    int heuristic = abs(_fromCol - start->x()) + abs(_fromRow - start->y());
+    int moveCost = 1;
+    start->setHeuristic(heuristic);
+    start->setMoveCost(moveCost);
+    pq.push(start);
+
+    while(!pq.empty())
+    {
+        Cell* cell = pq.top();
+        pq.pop();
+        if (cell == goal)
+        {
+            return true;
+        }
+
+        for (auto& next : neighbors(cell))
+        {
+            moveCost ++;
+            if( !next->moveCost() || ( next->moveCost() > moveCost) )
+            {
+                int heuristic = abs(next->x() - _fromCol) + abs(next->y() - _fromRow);
+                next->setParent(cell);
+                next->setHeuristic(heuristic);
+                next->setMoveCost(moveCost);
+                pq.push(next);
+            }
+        }
+    }
+    return false;
+}
+
+void Model::setScore(int score)
+{
+    _score = score;
+    emit scoreChanged(_score);
+}
+
 Gridtype &Model::getGrid() { return _grid;}
 
 void Model::clear()
@@ -247,15 +349,16 @@ void Model::clear()
 
 void Model::addRandomFigures(int num)
 {
+    std::mt19937 mt_rand(time(nullptr));
     for (int i = 0 ; i < num; i++)
     {
-        int t = rand() % 4 + 1;
+        int t = mt_rand() % maxTypeCount() + 1;
 
         int r = 0;
         int c = 0;
         do {
-            r = rand() % _row;
-            c = rand() % _col;
+            r = mt_rand() % _row;
+            c = mt_rand() % _col;
         }
         while( _grid[r][c].cellType() != FigureType::EMPTY );
         FigureType newType = static_cast<FigureType>(t);

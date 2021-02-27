@@ -31,6 +31,12 @@ View::View(QWidget *parent) : QWidget(parent) { }
 
 void View::setModel(Model *model) { _model = model; }
 
+void View::setFixedSize()
+{
+    QWidget::setFixedSize(QSize(_model->row()*50 + 1, _model->col()*50+1));
+    repaint();
+}
+
 void View::moveAnimation()
 {
     auto& grid  = _model->getGrid();
@@ -45,7 +51,7 @@ void View::moveAnimation()
     while (!((cell->x() == toCol) &&                //перемещение уже произошло ко времени отрисовки
            (cell->y() == toRow)))
     {
-        cell->setType(FigureType::FIVE);
+        cell->setType(FigureType::MAX);
         repaint();
         std::this_thread::sleep_for(std::chrono::milliseconds(100) );
         cell->setType(FigureType::EMPTY);
@@ -82,6 +88,14 @@ void View::drawFigure(Cell cell, QPainter *painter)
             painter->drawEllipse(rect);
             break;
         case FigureType::FIVE:
+            painter->setBrush(Qt::white);
+            painter->drawEllipse(rect);
+            break;
+        case FigureType::SIX:
+            painter->setBrush(Qt::darkMagenta);
+            painter->drawEllipse(rect);
+            break;
+        case FigureType::MAX:
             QRect miniRect = QRect(col*cellSize + cellSize/4,
                                row*cellSize + cellSize/4,
                                cellSize/2,

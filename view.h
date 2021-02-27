@@ -30,9 +30,13 @@ public:
     void setModel(Model *model);
 
 protected:
+
     void paintEvent(QPaintEvent *event)         override;
     void mousePressEvent(QMouseEvent *event)    override;
     void mouseReleaseEvent(QMouseEvent *event)  override;
+
+public slots:
+    void setFixedSize();
 };
 
 #endif // VIEW_H

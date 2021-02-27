@@ -8,7 +8,9 @@ enum class FigureType
     TWO,
     THREE,
     FOUR,
-    FIVE
+    FIVE,
+    SIX,
+    MAX,
 };
 
 class Cell{
