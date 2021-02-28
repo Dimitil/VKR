@@ -6,9 +6,6 @@
 #include <QEvent>
 #include <QDebug>
 
-#include <QEventLoop>
-#include <QTimer>
-
 
 class Model;
 class Cell;
@@ -29,6 +26,7 @@ public:
     View(QWidget *parent = nullptr);
     void setModel(Model *model);
 
+
 protected:
 
     void paintEvent(QPaintEvent *event)         override;
@@ -37,6 +35,7 @@ protected:
 
 public slots:
     void setFixedSize();
+    void gameOverDialog();
 };
 
 #endif // VIEW_H

@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->hardPushButton, SIGNAL(clicked()), model, SLOT(setHardDifficulty()));
     connect(ui->extraHardPushButton, SIGNAL(clicked()), model, SLOT(setExtraHardDifficulty()));
     connect(model, SIGNAL(difficultyChanged()), ui->scene, SLOT(setFixedSize()));
+    connect(model, SIGNAL(gameOver()), ui->scene, SLOT(gameOverDialog()));
 
     QAction *case1 = ui->menubar->addAction("Case 1");
     connect(case1, SIGNAL(triggered()), model, SLOT(testCase1()));

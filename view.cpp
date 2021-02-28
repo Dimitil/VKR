@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <chrono>
 #include <thread>
-
+#include <QMessageBox>
 
 
 void View::paintEvent(QPaintEvent *event)
@@ -37,6 +37,13 @@ void View::setFixedSize()
     repaint();
 }
 
+void View::gameOverDialog()
+{
+    QMessageBox::information(this, "Not bad!",
+                             "Game over!\nYou get " +
+                             QString::number(_model->score()) + " score!");
+}
+
 void View::moveAnimation()
 {
     auto& grid  = _model->getGrid();
@@ -47,16 +54,16 @@ void View::moveAnimation()
     int toCol   = _model->toCol();
 
     Cell* cell = &grid[fromRow][fromCol];
-    FigureType ft = grid[toRow][toCol].cellType(); //потому что в модели
+    //FigureType ft = grid[toRow][toCol].cellType(); //потому что в модели
     while (!((cell->x() == toCol) &&                //перемещение уже произошло ко времени отрисовки
            (cell->y() == toRow)))
     {
+        FigureType buf = cell->cellType();
         cell->setType(FigureType::MAX);
         repaint();
         std::this_thread::sleep_for(std::chrono::milliseconds(100) );
-        cell->setType(FigureType::EMPTY);
+        cell->setType(buf);
         cell = cell->cellParent();
-        cell->setType(ft);
     }
 }
 

@@ -31,20 +31,14 @@ public:
     bool visited() const;
     Cell* cellParent() const;
     int heuristic() const;
-    int moveCost() const
-    {
-        return _moveCost;
-    }
+    int moveCost() const;
     void setY(int y);
     void setX(int x);
     void setVisited(bool b);
     void setType(FigureType type);
     void setParent(Cell* newParent);
     void setHeuristic(int heuristic);
-    void setMoveCost(int moveCost)
-    {
-        _moveCost = moveCost;
-    }
+    void setMoveCost(int moveCost);
 };
 
 #endif // CELL_H

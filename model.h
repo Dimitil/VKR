@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QColor>
 #include <random>
+#include <QDialog>
 
 #include <QVector>
 #include <QSet>
@@ -47,6 +48,7 @@ class Model : public QObject
     void leftDiagonalCheck(QSet<Cell*> &set, int row, int col);
     int deleteSet(QSet<Cell*> &set);
     int checkAndDeleteLines(int row, int col);
+    int emptyCells();
 
     void setScore(int score);
     void setEqualCount(int equalCount);
@@ -61,14 +63,8 @@ class Model : public QObject
 
     int maxTypeCount();
     FigureType getRandomType();
-    int getRandomCol()
-    {
-        return _mt_rand() % _col;
-    }
-    int getRandomRow()
-    {
-        return _mt_rand() % _col;
-    }
+    int getRandomCol();
+    int getRandomRow();
 
     bool bfs(); //pathfinding algorithms
     bool bestFirst();
@@ -77,10 +73,12 @@ class Model : public QObject
 
     bool moveTo(int oldRow, int oldCol, int newRow, int newCol);
 
+
+
 public:
     Model(QObject *parent = nullptr);
 
-    void addRandomFigures(int num);
+    int addRandomFigures(int num);
     void addRandomFigure(int row, int col);
     void setFrom(int row, int col);
     void setTo(int row, int col);
@@ -101,6 +99,7 @@ public:
 signals:
     void scoreChanged(int newScore);
     void difficultyChanged();
+    void gameOver();
 
 public slots:
     void setBfsAlgorithm();

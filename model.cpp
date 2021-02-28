@@ -106,7 +106,11 @@ bool Model::doStep()
         {
             if (!checkAndDeleteLines(_toRow, _toCol) && !_testMode)
             {
-                addRandomFigures(3);
+                if (!addRandomFigures(3))
+                {
+                    emit gameOver();
+                    return false;
+                }
             }
             return true;
         }
@@ -248,6 +252,16 @@ FigureType Model::getRandomType()
     int t = _mt_rand() % maxTypeCount() + 1;
     FigureType ft = static_cast<FigureType>(t);
     return ft;
+}
+
+int Model::getRandomCol()
+{
+    return _mt_rand() % _col;
+}
+
+int Model::getRandomRow()
+{
+    return _mt_rand() % _col;
 }
 
 QVector<Cell *> Model::neighbors(Cell *cell)
@@ -404,8 +418,17 @@ void Model::clear()
 
 
 
-void Model::addRandomFigures(int num)
+int Model::addRandomFigures(int num)
 {
+    int emptyCellsCount = emptyCells();
+    if (emptyCellsCount == 0)
+    {
+        return 0;
+    }
+    else if ( num > emptyCellsCount)
+    {
+        num = emptyCellsCount;
+    }
     for (int i = 0 ; i < num; i++)
     {
         int r = 0;
@@ -420,6 +443,14 @@ void Model::addRandomFigures(int num)
         {
             --i;
         }
+    }
+    if (emptyCells() == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return num;
     }
 }
 
@@ -453,6 +484,22 @@ int Model::checkAndDeleteLines(int row, int col)
     int totalDeleted = deleteSet(set);
     addScore(totalDeleted);
     return totalDeleted;
+}
+
+int Model::emptyCells()
+{
+    int emptyCellsCount = 0;
+    for (int r = 0; r < _row; r++)
+    {
+        for (int c = 0; c < _col; c++)
+        {
+            if (_grid[r][c].cellType() == FigureType::EMPTY)
+            {
+                emptyCellsCount++;
+            }
+        }
+    }
+    return emptyCellsCount;
 }
 
 void Model::horizontalCheck(QSet<Cell*> &set, int row, int col)

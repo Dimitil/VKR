@@ -46,6 +46,11 @@ void Cell::setHeuristic(int heuristic)
     _heuristic = heuristic;
 }
 
+void Cell::setMoveCost(int moveCost)
+{
+    _moveCost = moveCost;
+}
+
 Cell *Cell::cellParent() const
 {
     return _parent;
@@ -54,6 +59,11 @@ Cell *Cell::cellParent() const
 int Cell::heuristic() const
 {
     return _heuristic;
+}
+
+int Cell::moveCost() const
+{
+    return _moveCost;
 }
 
 Cell::Cell(FigureType type) : _type(type) {}
