@@ -13,16 +13,17 @@ MainWindow::MainWindow(QWidget *parent)
     auto model = new Model(this);
     ui->scene->setModel(model);
 
+
+    connect(ui->bfsPushButton, &QPushButton::clicked, model, &Model::setBfsAlgorithm);
+    connect(ui->bestFirstPushButton, &QPushButton::clicked, model, &Model::setBestFirstAlgorithm);
+    connect(ui->aStarPushButton, &QPushButton::clicked, model, &Model::setAStarAlgorithm);
+    connect(ui->eazyPushButton, &QPushButton::clicked, model, &Model::setEazyDifficulty);
+    connect(ui->normalPushButton, &QPushButton::clicked, model, &Model::setNormalDifficulty);
+    connect(ui->hardPushButton, &QPushButton::clicked, model, &Model::setHardDifficulty);
+    connect(ui->extraHardPushButton, &QPushButton::clicked, model, &Model::setExtraHardDifficulty);
+    connect(model, &Model::difficultyChanged, ui->scene, &View::setFixedSize);
+    connect(model, &Model::gameOver, ui->scene, &View::gameOverDialog);
     connect(model, &Model::scoreChanged, ui->scoreDisplay,  QOverload<int>::of(&QLCDNumber::display));
-    connect(ui->bfsPushButton, SIGNAL(clicked()), model, SLOT(setBfsAlgorithm()));
-    connect(ui->bestFirstPushButton, SIGNAL(clicked()), model, SLOT(setBestFirstAlgorithm()));
-    connect(ui->aStarPushButton, SIGNAL(clicked()), model, SLOT(setAStarAlgorithm()));
-    connect(ui->eazyPushButton, SIGNAL(clicked()), model, SLOT(setEazyDifficulty()));
-    connect(ui->normalPushButton, SIGNAL(clicked()), model, SLOT(setNormalDifficulty()));
-    connect(ui->hardPushButton, SIGNAL(clicked()), model, SLOT(setHardDifficulty()));
-    connect(ui->extraHardPushButton, SIGNAL(clicked()), model, SLOT(setExtraHardDifficulty()));
-    connect(model, SIGNAL(difficultyChanged()), ui->scene, SLOT(setFixedSize()));
-    connect(model, SIGNAL(gameOver()), ui->scene, SLOT(gameOverDialog()));
 
     QAction *case1 = ui->menubar->addAction("Case 1");
     connect(case1, SIGNAL(triggered()), model, SLOT(testCase1()));
