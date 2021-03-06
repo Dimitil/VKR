@@ -230,7 +230,8 @@ void Model::clearParent()
     }
 }
 
-int Model::maxTypeCount(){
+int Model::maxTypeCount() const
+{
     switch (_difficulty)
     {
     case DifficultyType::EAZY:
@@ -244,8 +245,8 @@ int Model::maxTypeCount(){
     default:
         return 0;
     }
-    return 0;
 }
+
 
 FigureType Model::getRandomType()
 {

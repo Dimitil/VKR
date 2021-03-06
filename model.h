@@ -61,7 +61,7 @@ class Model : public QObject
     void clearMoveCost();
     void clearParent();
 
-    int maxTypeCount();
+    int maxTypeCount() const;
     FigureType getRandomType();
     int getRandomCol();
     int getRandomRow();
@@ -96,11 +96,6 @@ public:
 
     bool doStep();
 
-signals:
-    void scoreChanged(int newScore);
-    void difficultyChanged();
-    void gameOver();
-
 public slots:
     void setBfsAlgorithm();
     void setBestFirstAlgorithm();
@@ -112,6 +107,11 @@ public slots:
     void setExtraHardDifficulty();
 
     void testCase1();
+
+signals:
+    void scoreChanged(int newScore);
+    void difficultyChanged();
+    void gameOver();
 };
 
 #endif // MODEL_H
