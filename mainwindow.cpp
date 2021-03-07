@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto model = new Model(this);
     ui->scene->setModel(model);
 
+    setWindowTitle("Lines");
 
     connect(ui->bfsPushButton, &QPushButton::clicked, model, &Model::setBfsAlgorithm);
     connect(ui->bestFirstPushButton, &QPushButton::clicked, model, &Model::setBestFirstAlgorithm);

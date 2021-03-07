@@ -17,21 +17,17 @@ class View : public QWidget
     Model *_model;
 
     void moveAnimation();
-
     void drawFigure(Cell cell, QPainter *painter);
+
 protected:
     void drawScene(QPainter *painter);
+    void paintEvent(QPaintEvent *event)         override;
+    void mousePressEvent(QMouseEvent *event)    override;
+    void mouseReleaseEvent(QMouseEvent *event)  override;
 
 public:
     View(QWidget *parent = nullptr);
     void setModel(Model *model);
-
-
-protected:
-
-    void paintEvent(QPaintEvent *event)         override;
-    void mousePressEvent(QMouseEvent *event)    override;
-    void mouseReleaseEvent(QMouseEvent *event)  override;
 
 public slots:
     void setFixedSize();

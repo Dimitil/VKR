@@ -658,16 +658,7 @@ int Model::deleteSet(QSet<Cell *> &set)
 
 void Model::addScore(int deletedCells)
 {
-    if (deletedCells == _equalCount)
-    {
-        _score += deletedCells;
-    }
-    else if (deletedCells > _equalCount)
-    {
-        int bonus = deletedCells - _equalCount;
-        bonus *=2;
-        _score += bonus;
-        _score += _equalCount;
-    }
+    int bonus = deletedCells * (deletedCells - _equalCount + 1);
+    _score += bonus;
     emit scoreChanged(_score);
 }
