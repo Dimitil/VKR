@@ -1,6 +1,7 @@
 #include "model.h"
 #include <QDebug>
 #include <random>
+#include <chrono>
 
 Model::Model(QObject *parent) : QObject(parent), _col(0), _row(0)
 {
@@ -100,8 +101,12 @@ void Model::coordinateAllCells()
 
 bool Model::doStep()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     if((this->*_algorithm)())
     {
+    auto stop = std::chrono::high_resolution_clock::now();
+    long long n = (stop - start).count();
+    qDebug() << n;
         if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
         {
             if (!checkAndDeleteLines(_toRow, _toCol) && !_testMode)
@@ -307,8 +312,8 @@ bool Model::bfs()
     q.push_back(start);
     while(!q.empty())
     {
-        Cell* cell = q.back();
-        q.pop_back();
+        Cell* cell = q.front();
+        q.pop_front();
         if (cell == goal)
         {
             return true;
