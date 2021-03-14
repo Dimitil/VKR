@@ -28,6 +28,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     QAction *case1 = ui->menubar->addAction("Case 1");
     connect(case1, SIGNAL(triggered()), model, SLOT(testCase1()));
+    QAction *case2 = ui->menubar->addAction("Case 2");
+    connect(case2, SIGNAL(triggered()), model, SLOT(testCase2()));
+    QAction *case3 = ui->menubar->addAction("Case 3");
+    connect(case3, SIGNAL(triggered()), model, SLOT(testCase3()));
+    QAction *case4 = ui->menubar->addAction("Case 4");
+    connect(case4, SIGNAL(triggered()), model, SLOT(testCase4()));
+    QAction *autoTest = ui->menubar->addAction("AutoTest");
+    connect(autoTest, SIGNAL(triggered()), model, SLOT(autoTest()));
+
 
     setFixedSize(minimumSize());
     emit model->difficultyChanged();

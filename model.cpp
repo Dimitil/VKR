@@ -78,6 +78,12 @@ void Model::setFrom(int row, int col)
 
 void Model::setTo(int row, int col)
 {
+    if ((row < 0) || (row > _row - 1) || (col < 0) || (col > _col - 1))
+    {
+        _toCol = _fromCol;
+        _toRow = _fromRow;
+        return;
+    }
     _toCol = col;
     _toRow = row;
 }
@@ -101,12 +107,12 @@ void Model::coordinateAllCells()
 
 bool Model::doStep()
 {
-    auto start = std::chrono::high_resolution_clock::now();
+   // auto start = std::chrono::high_resolution_clock::now();
     if((this->*_algorithm)())
     {
-    auto stop = std::chrono::high_resolution_clock::now();
-    long long n = (stop - start).count();
-    qDebug() << n;
+    //auto stop = std::chrono::high_resolution_clock::now();
+   // long long time = (stop - start).count();
+    //qDebug() << time;
         if (moveTo(_fromRow, _fromCol, _toRow, _toCol))
         {
             if (!checkAndDeleteLines(_toRow, _toCol) && !_testMode)
@@ -185,7 +191,7 @@ void Model::setExtraHardDifficulty()
     emit difficultyChanged();
 }
 
-void Model::testCase1(){
+void Model::testCase2(){
     testModeOn();
     resize(12, 12);
     clear();
@@ -200,6 +206,143 @@ void Model::testCase1(){
     }
     addRandomFigure(_row - 3, 1);
     emit difficultyChanged();
+}
+
+void Model::testCase1()
+{
+    testModeOn();
+    resize(12,12);
+    clear();
+    addRandomFigure(0, 0);
+    emit difficultyChanged();
+}
+
+void Model::testCase3()
+{
+    testModeOn();
+    resize(12,12);
+    clear();
+    for (int r = 0; r < _row; r += 2)
+    {
+        int start = r % 3;
+        for (int c = start ; c < _col - start; c += 4)
+        {
+            for(int i = 0; i < 3; i++)
+            {
+                addRandomFigure(r, c + i);
+            }
+        }
+    }
+    emit difficultyChanged();
+}
+
+void Model::testCase4()
+{
+    testModeOn();
+    resize(12,12);
+    clear();
+    addRandomFigure(0, 0);
+    for (int r = 1; r < _row / 2; r += 2)
+    {
+        for (int c = r; c < _col-r; c++)
+        {
+            addRandomFigure(r, c);
+        }
+    }
+    addRandomFigure(_row/2, _col/2 - 1);
+    for (int r = _row - 2; r > _row/2; r -= 2)
+    {
+        for (int c = r - 1 ; c > _col - r - 1; c--)
+        {
+            addRandomFigure(r, c);
+        }
+    }
+    for (int c = 1; c < _col; c +=9)
+    {
+        for (int r = 1; r < _row - 1; r++)
+        {
+            addRandomFigure(r, c);
+        }
+    }
+    for (int c = 3; c < 9; c+=5)
+    {
+        for(int r = 3; r < 9; r++)
+        {
+            addRandomFigure(r, c);
+        }
+    }
+    _grid[10][5].setType(FigureType::EMPTY);
+    _grid[3][5].setType(FigureType::EMPTY);
+    emit difficultyChanged();
+
+}
+
+void Model::autoTest()
+{
+    unsigned long long int averageTimeBfsCase[4];
+    unsigned long long int averageTimeBFCase[4];
+    unsigned long long int averageTimeAStarCase[4];
+    for(int i = 0 ; i < 4; i++)
+    {
+        switch (i)
+        {
+        case 0:
+            testCase1();
+            break;
+        case 1:
+            testCase2();
+            break;
+        case 2:
+            testCase3();
+            break;
+        case 3:
+            testCase4();
+        }
+        setBfsAlgorithm();
+        averageTimeBfsCase[i] = runTest();
+        setBestFirstAlgorithm();
+        averageTimeBFCase[i] = runTest();
+        setAStarAlgorithm();
+        averageTimeAStarCase[i] = runTest();
+    }
+    QMessageBox::information(nullptr, "Test",
+                             QString("Duration in [ns].\n\t BFS:\t Best-First:\t  A*:\n "
+                                     "Case1:\t %1\t %5\t %9  \n "
+                                     "Case2:\t %2\t %6\t %10 \n "
+                                     "Case3:\t %3\t %7\t %11 \n "
+                                     "Case4:\t %4\t %8\t %12 \n")
+                             .arg(averageTimeBfsCase[0])
+            .arg(averageTimeBfsCase[1])
+            .arg(averageTimeBfsCase[2])
+            .arg(averageTimeBfsCase[3])
+            .arg(averageTimeBFCase[0])
+            .arg(averageTimeBFCase[1])
+            .arg(averageTimeBFCase[2])
+            .arg(averageTimeBFCase[3])
+            .arg(averageTimeAStarCase[0])
+            .arg(averageTimeAStarCase[1])
+            .arg(averageTimeAStarCase[2])
+            .arg(averageTimeAStarCase[3]));
+
+}
+
+unsigned long long Model::runTest()
+{
+    unsigned long long int timeSum = 0;
+    int countIter = 10000;
+    for(int i = 0; i < countIter; i++)
+    {
+        setFrom(0, 0);
+        setTo(11, 11);
+        auto start = std::chrono::high_resolution_clock::now();
+        doStep();
+        auto stop = std::chrono::high_resolution_clock::now();
+        long long time = (stop - start).count();
+        _grid[11][11].setType(FigureType::EMPTY);
+        _grid[0][0].setType(FigureType::FIVE);
+        timeSum+=time;
+    }
+    return timeSum/countIter;
 }
 
 void Model::clearVisited()
@@ -304,6 +447,11 @@ QVector<Cell *> Model::neighbors(Cell *cell)
 
 bool Model::bfs()
 {
+    if( ((_toCol == _fromCol) && (_toRow == _fromRow)) ||
+            (_grid[_toRow][_toCol].cellType() != FigureType::EMPTY))
+    {
+        return false;
+    }
     clearVisited();
     QQueue <Cell*> q;
     Cell* start = &_grid[_toRow][_toCol];
@@ -333,6 +481,11 @@ bool Model::bfs()
 
 bool Model::bestFirst() //pathfinding algorithm
 {
+    if( ((_toCol == _fromCol) && (_toRow == _fromRow)) ||
+            (_grid[_toRow][_toCol].cellType() != FigureType::EMPTY))
+    {
+        return false;
+    }
     clearVisited();
     std::priority_queue <Cell*, QVector<Cell*>, comparatorBestFirst> pq;
     Cell *start = &_grid[_toRow][_toCol];
@@ -367,6 +520,11 @@ bool Model::bestFirst() //pathfinding algorithm
 
 bool Model::aStar()
 {
+    if( ((_toCol == _fromCol) && (_toRow == _fromRow)) ||
+            (_grid[_toRow][_toCol].cellType() != FigureType::EMPTY))
+    {
+        return false;
+    }
     clearMoveCost();
 
     std::priority_queue <Cell*, QVector<Cell*>, comparatorAStar> pq;

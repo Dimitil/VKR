@@ -6,6 +6,7 @@
 #include <QColor>
 #include <random>
 #include <QDialog>
+#include <QMessageBox>
 
 #include <QVector>
 #include <QSet>
@@ -107,6 +108,11 @@ public slots:
     void setExtraHardDifficulty();
 
     void testCase1();
+    void testCase2();
+    void testCase3();
+    void testCase4();
+    void autoTest();
+    unsigned long long int runTest();
 
 signals:
     void scoreChanged(int newScore);
